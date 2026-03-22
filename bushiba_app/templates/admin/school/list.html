@@ -1,0 +1,60 @@
+{%extends 'admin/muban.html' %}
+
+{% block title %}学校管理{% endblock %}
+
+{% block content %}
+
+<div class="container">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <span class="glyphicon glyphicon-th-list" aria-hidden="true"></span>
+            学校列表
+        </div>
+        <table class="table table-bordered">
+            <thead>
+            <tr>
+                <th style="font-size:20px">id</th>
+                <th style="font-size:20px;text-align: center;">学校</th>
+                <th style="font-size:20px;text-align: right;">操作</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for dep in data %}
+            <tr>
+                <th style="font-size:20px">{{ dep.id }}</th>
+                <td style="font-size:20px;text-align: center">{{ dep.school }}</td>
+
+                <td style="text-align: right;">
+                    <button class="btn btn-danger" id="Delete{{ dep.id }}" data-url="/admin/school/del/?nid={{ dep.id }}">
+                        删除
+                    </button>
+                </td>
+            </tr>
+            <script>
+                // 等待文档加载完成
+                document.addEventListener('DOMContentLoaded', function () {
+                    // 获取删除按钮元素
+                    const Delete{{ dep.id }} = document.getElementById('Delete{{ dep.id }}');
+                    if (Delete{{ dep.id }}) {
+                        // 为按钮添加点击事件监听器
+                        Delete{{ dep.id }}.addEventListener('click', function () {
+                            // 获取按钮的 data-url 属性值，即删除的 URL
+                            const deleteUrl = this.dataset.url;
+                            // 弹出确认对话框
+                            if (confirm('你确定要删除吗？')) {
+                                // 用户点击确定，进行页面跳转
+                                window.location.href = deleteUrl;
+                            }
+                        });
+                    }
+                });
+
+
+            </script>
+            {% endfor %}
+            </tbody>
+        </table><!--表单-->
+    </div><!--用户列表-->
+</div>
+{% endblock %}
+

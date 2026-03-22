@@ -1,0 +1,547 @@
+{%extends 'user/muban.html' %}
+
+{% block title %}聊天室{% endblock %}
+
+{% block css %}
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Segoe UI', sans-serif;
+    }
+    body {
+        min-height: auto;
+        background-color: #f0f2f5;
+    }
+    .chat-wrapper {
+        display: flex;
+        width: 1000px;
+        max-width: 95%;
+        min-height: 650px;
+        background-color: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        height: 100vh; /* 设置高度为视口高度 */
+    }
+    /* 左侧用户列表 */
+    .user-list-container {
+        width: 280px;
+        border-right: 1px solid #e0e0e0;
+        display: flex;
+        flex-direction: column;
+        overflow-y: auto; /* 添加垂直滚动 */
+    }
+
+    .user-list-header {
+        padding: 16px 24px;
+        background-color: #f8f9fa;
+        font-size: 1.5rem;
+        font-weight: 500;
+        border-bottom: 1px solid #e0e0e0;
+    }
+    .user-item {
+        padding: 12px 24px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        position: relative;
+        padding-right: 28px; /* 为小红点留出空间 */
+    }
+    .user-item:hover {
+        background-color: #f0f2f5;
+    }
+    .user-item.active {
+        background-color: #e9f2ff;
+        border-left: 4px solid #1a73e8;
+    }
+    .user-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background-color: #ddd;
+    }
+    /* 右侧聊天窗口 */
+    .chat-container {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        min-width: 500px;
+        height: 100%; /* 填满整个容器 */
+    }
+    .chat-header {
+        padding: 16px 24px;
+        background-color: #1a73e8;
+        color: white;
+        border-radius: 0 12px 0 0;
+        font-size: 1.2rem;
+        font-weight: 500;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: relative;
+    }
+    .current-chat {
+        font-size: 20px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .chat-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: #ddd;
+    }
+    .chat-messages {
+        flex-grow: 1;
+        padding: 24px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+    .message {
+        max-width: 70%;
+        padding: 12px 16px;
+        border-radius: 8px;
+        line-height: 1.4;
+    }
+    .incoming {
+        background-color: #f0f2f5;
+        align-self: flex-start;
+    }
+    .outgoing {
+        background-color: #1a73e8;
+        color: white;
+        align-self: flex-end;
+    }
+    .chat-input {
+        padding: 24px;
+        background-color: white;
+        border-top: 1px solid #e0e0e0;
+        display: flex;
+        gap: 16px;
+    }
+    #message-input {
+        flex-grow: 1;
+        padding: 12px 16px;
+        border: 1px solid #d0d0d0;
+        border-radius: 24px;
+        font-size: 1rem;
+        resize: none;
+    }
+    #send-button {
+        padding: 12px 24px;
+        background-color: #1a73e8;
+        color: white;
+        border: none;
+        border-radius: 24px;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+    #send-button:hover {
+        background-color: #1557b0;
+    }
+    /* 滚动条样式 */
+    .chat-messages::-webkit-scrollbar {
+        width: 8px;
+    }
+    .chat-messages::-webkit-scrollbar-track {
+        background-color: #f5f5f5;
+    }
+    .chat-messages::-webkit-scrollbar-thumb {
+        background-color: #c0c0c0;
+        border-radius: 4px;
+    }
+
+
+</style>
+
+<!-- 小红点 -->
+<style>
+/* 新增小红点样式 */
+.badge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: #ff4d4f;
+    color: white;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 0;
+    z-index: 10; /* 确保不被其他元素覆盖 */
+    pointer-events: none; /* 防止遮挡点击事件 */
+}
+
+
+</style>
+
+<!-- 好友列表/申请 -->
+<style>
+/* 添加导航栏样式 */
+.chat-nav {
+    display: flex;
+    background-color: white;
+    border-bottom: 1px solid #e0e0e0;
+    position: relative;
+    height: 56px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.nav-item {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 16px;
+    font-weight: 500;
+    color: #333;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    position: relative;
+}
+
+.nav-item.active {
+    color: #1a73e8;
+    font-weight: 600;
+}
+
+.nav-item:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 12px;
+    height: 32px;
+    width: 1px;
+    background-color: #e0e0e0;
+}
+
+</style>
+{% endblock %}
+
+
+{% block content %}
+<div class="chat-wrapper">
+    <!-- 左侧用户列表 -->
+    <div class="user-list-container">
+        <div class="chat-nav">
+            <div class="nav-item active" data-tab="friends-list">
+                <span>好友列表</span>
+            </div>
+            <div class="nav-item" data-tab="friend-requests">
+                <span>好友申请</span>
+                {% if req_count > 0%}
+                    <span class="badge" style="display: inline-block;">{{ req_count }}</span>
+                {% endif %}
+            </div>
+        </div>
+        <!-- 好友列表 -->
+        <div id="user-list" class="user-list">
+            {% for user, count in user_list %}
+            <div class="user-item" data-user-id="{{ user.id }}">
+                <img class="user-avatar" src="{{ user.avatar.url }}" data-user-avatar="{{ user.avatar.url }}">
+                <div>{{ user.name }}</div>
+                {% if count > 0%}
+                    <span class="badge" style="display: inline-block;">{{ count }}</span>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- 好友申请 -->
+        <div id="user-requests" style="display: none" class="user-list">
+            {% for user in user_requests %}
+            <div class="user-item">
+                <img class="user-avatar" src="{{ user.avatar.url }}">
+                <div>{{ user.name }}</div>
+                <button class="btn btn-primary" onclick="agree({{ user.id }})">同意</button>
+            </div>
+            {% endfor %}
+
+        </div>
+    </div>
+
+    <!-- 右侧聊天窗口 -->
+    <div class="chat-container">
+        <div class="chat-header">
+            <div class="current-chat">
+                <img class="chat-avatar" id="chat-avatar-img" src="">
+                <div id="current-user"></div>
+            </div>
+        </div>
+
+        <div class="chat-messages" id="message-container">
+            <!-- 聊天信息 -->
+        </div>
+
+        <div class="chat-input">
+            <textarea id="message-input" placeholder="请输入消息...(限制2000字)" rows="1" maxlength="2000"
+                      style="font-size:20px;"></textarea>
+            <button id="send-button" onclick="sendMessage()" style="font-size:20px;">发送</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block js %}
+<!-- 好友列表/申请 切换 -->
+<script>
+// 添加导航交互逻辑
+document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', function() {
+        // 移除所有active状态
+        document.querySelectorAll('.nav-item').forEach(el => {
+            el.classList.remove('active');
+        });
+
+        // 设置当前active
+        this.classList.add('active');
+
+        // 切换内容区域
+        const tab = this.dataset.tab;
+        if (tab === 'friends-list') {
+            document.getElementById('user-list').style.display = 'block';
+            document.getElementById('user-requests').style.display = 'none';
+        } else {
+            document.getElementById('user-list').style.display = 'none';
+            document.getElementById('user-requests').style.display = 'block';
+        }
+    });
+});
+</script>
+
+<!-- 添加好友 -->
+<script>
+function agree(id) {
+    $.ajax({
+        url: `/user/friend/agree/?nid=${id}`,
+        type: 'GET',
+        dataType: 'json',
+        success: function(res) {
+            if(res.status) {
+                alert("添加成功");
+                location.reload();
+            } else {
+                console.log(res.error);
+            }
+        }
+    })
+}
+</script>
+
+<!-- 小红点 -->
+<script>
+    // 新增用户消息计数器
+    const userMessageCounts = {};
+
+    function updateUserMessageCount(userId) {
+        userMessageCounts[userId] = (userMessageCounts[userId] || 0) + 1;
+
+        // 查找用户项
+        const userItem = userList.querySelector(`.user-item[data-user-id="${userId}"]`);
+        if (userItem) {
+            // 获取或创建小红点
+            let badge = userItem.querySelector('.badge');
+            if (!badge) {
+                badge = createBadge(userItem);
+            }
+
+            // 更新计数并显示
+            badge.textContent = userMessageCounts[userId];
+            badge.style.display = 'inline-block'; // 关键修改：强制显示
+        }
+    }
+
+    // 创建小红点元素
+    function createBadge(userItem) {
+        const badge = document.createElement('span');
+        badge.className = 'badge';
+        badge.style.display = 'none';
+        userItem.appendChild(badge);
+        return badge;
+    }
+
+
+</script>
+
+<!-- websocket连接 -->
+<script>
+    // 用于存储当前选中的用户ID
+    let userid = null;
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const host = window.location.host; // 自动获取当前访问的主机（如 192.168.1.100:8000 或 your-domain.com）
+    let socket = null; // 初始化为null
+    const userList = document.getElementById('user-list');      // 用户列表容器
+    const messageContainer = document.getElementById('message-container');  // 消息显示区域
+    const currentUserDisplay = document.getElementById('current-user');     // 当前用户显示区域
+    const input = document.getElementById('message-input');                 // 消息输入框
+    const sendButton = document.getElementById('send-button');              // 发送按钮
+    const from_user = {{ from_user }}
+
+    // 用户列表点击事件
+    userList.querySelectorAll('.user-item').forEach(item => {
+        item.addEventListener('click', () => {
+            // 清除所有选中状态，设置当前选择的为激活状态
+            userList.querySelectorAll('.user-item').forEach(i => i.classList.remove('active'));
+            item.classList.add('active');
+            // 更新当前用户信息
+            currentChatUserId = item.dataset.userId;
+            userid = item.dataset.userId;
+
+            // 清除当前用户的小红点
+            const previousUserId = currentChatUserId;
+            if (previousUserId) {
+                userMessageCounts[previousUserId] = 0;
+                const previousUserItem = userList.querySelector(`.user-item[data-user-id="${previousUserId}"]`);
+                if (previousUserItem) {
+                    const badge = previousUserItem.querySelector('.badge');
+                    if (badge) badge.style.display = 'none';
+                }
+            }
+
+            // 获取并设置头像
+            const avatarImg = item.querySelector('.user-avatar');
+            document.getElementById('chat-avatar-img').src = avatarImg.src;
+
+            // 关闭旧连接（安全检查）
+            if (socket) {
+                if (socket.readyState === WebSocket.OPEN) {
+                    socket.close();
+                }
+                socket = null; // 重置变量
+            }
+
+            socket = new WebSocket(`${protocol}//${host}/chat/${from_user}/${userid}/`);
+
+            // 连接成功自动触发这个函数
+            socket.onopen = function (event) {
+            console.log("连接成功");
+            }
+
+            // 当websocket接收到服务端的消息自动触发这个函数
+            socket.onmessage = function (event) {
+            const data = JSON.parse(event.data);
+            handleMessage(data);
+            }
+
+            // 加载聊天记录
+            fetchChatHistory(from_user, userid);
+
+            // 更新用户名显示
+            currentUserDisplay.textContent = avatarImg.alt || item.querySelector('div').textContent;
+            // 清空消息列表（实际应用中应加载历史记录）
+            messageContainer.innerHTML = `
+            `;
+        });
+    });
+
+    // 消息处理函数
+    function handleMessage(data) {
+        // 判断是否是当前聊天用户
+        if (data.from_user === currentChatUserId) {
+            addMessage(data.text, 'incoming');
+        } else {
+            // 更新小红点
+            updateUserMessageCount(data.from_user);
+        }
+    }
+
+    // 发送消息功能（带聊天对象标识）
+    sendButton.addEventListener('click', () => {
+        const messageText = input.value.trim();
+        if (messageText) {
+            // 添加自己的消息（带当前聊天对象）
+            addMessage(messageText, 'outgoing');
+            input.value = '';
+        }
+    });
+
+    // 回车键发送消息
+    input.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendButton.click();
+        }
+    });
+
+    // 添加消息到界面（带用户标识）
+    function addMessage(text, type, time) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${type}`;
+        messageDiv.title = `${time}`;
+        messageDiv.innerHTML = `
+            <div>${text}</div>
+        `;
+        messageContainer.appendChild(messageDiv);
+        messageContainer.scrollTop = messageContainer.scrollHeight;
+    }
+
+    // 客户端向服务端发消息
+    function sendMessage() {
+        let tag = document.getElementById("message-input");
+        socket.send(tag.value);
+    }
+
+
+</script>
+
+<!-- 请求获取聊天记录 -->
+<script>
+// 独立AJAX请求函数
+function fetchChatHistory(fromUser, toUser) {
+    $.ajax({
+        url: `/user/chat/message/?from_user=${fromUser}&to_user=${toUser}`,
+            type: 'GET',
+            dataType: 'json',
+            success: function(response) {
+                response.messages.forEach(msg => {
+                    let type = 'outgoing';
+                    if(msg.from_user === fromUser){
+                        type = 'outgoing';
+                    } else {
+                        type = 'incoming';
+                    }
+                    //  添加消息
+                    addMessage(msg.text, type, msg.time);
+                });
+            },
+            // 请求失败时的回调函数
+            error: function(xhr) {
+                console.log('请求失败');
+            }
+        });
+}
+
+
+</script>
+
+<!-- 初始化选择第一个 -->
+<script>
+    // 页面加载完成后自动执行
+    document.addEventListener('DOMContentLoaded', function() {
+        // 等待用户列表渲染完成
+        const userListElement = document.getElementById('user-list');
+        if (userListElement) {
+            // 获取第一个用户项
+            const firstUserItem = userListElement.querySelector('.user-item');
+            if (firstUserItem) {
+                // 模拟点击第一个用户项
+                firstUserItem.click();
+            }
+        }
+    });
+
+
+</script>
+{% endblock %}

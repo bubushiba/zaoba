@@ -1,0 +1,81 @@
+{% extends 'admin/muban.html' %}
+
+{% block title %}任务管理{% endblock %}
+
+{% block content %}
+
+<div class="container">
+    <div style="margin-bottom: 10px">
+        <a href="/admin/task/add/" class="btn btn-success">
+            <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+            添加任务
+        </a>
+    </div><!--添加用户-->
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <span class="glyphicon glyphicon-th-list" aria-hidden="true"></span>
+            任务列表
+        </div>
+        <table class="table table-bordered">
+            <thead>
+            <tr>
+                <th style="font-size:20px">id</th>
+                <th style="font-size:20px;text-align: center;">标题</th>
+                <th style="font-size:20px;text-align: center;">发布时间</th>
+                <th style="font-size:20px;text-align: center;">发布人</th>
+                <th style="font-size:20px;text-align: center;">需求</th>
+                <th style="font-size:20px;text-align: center;">需求图片</th>
+                <th style="font-size:20px;text-align: center;">定价</th>
+                <th style="font-size:20px;text-align: center;">状态</th>
+                <th style="font-size:20px;text-align: right;">操作</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for dep in data %}
+            <tr>
+                <th style="font-size:20px">{{ dep.id }}</th>
+                <td style="font-size:20px;text-align: center">{{ dep.title|truncatechars:10 }}</td>
+                <td style="font-size:20px;text-align: center">{{ dep.time }}</td>
+                <td style="font-size:20px;text-align: center">{{ dep.user }}</td>
+                <td style="font-size:20px;text-align: center;">{{ dep.demand|truncatechars:10 }}</td>
+                <td style="font-size:20px;text-align: center">
+                    {% if dep.demand_image %}
+                    <img src="{{ dep.demand_image.url }}" alt="需求图片" style="max-width: 100px; height: auto;">
+                    {% endif %}
+                </td>
+                <td style="font-size:20px;text-align: center">{{ dep.price }}</td>
+                <td style="font-size:20px;text-align: center">{{ dep.get_state_display }}</td>
+                <td style="text-align: right;">
+
+                    <button class="btn btn-danger" id="Delete{{ dep.id }}" data-url="/admin/task/del/?nid={{ dep.id }}">
+                        删除
+                    </button>
+                </td>
+            </tr>
+            <script>
+                // 等待文档加载完成
+                document.addEventListener('DOMContentLoaded', function () {
+                    // 获取删除按钮元素
+                    const Delete{{ dep.id }} = document.getElementById('Delete{{ dep.id }}');
+                    if (Delete{{ dep.id }}) {
+                        // 为按钮添加点击事件监听器
+                        Delete{{ dep.id }}.addEventListener('click', function () {
+                            // 获取按钮的 data-url 属性值，即删除的 URL
+                            const deleteUrl = this.dataset.url;
+                            // 弹出确认对话框
+                            if (confirm('你确定要删除吗？')) {
+                                // 用户点击确定，进行页面跳转
+                                window.location.href = deleteUrl;
+                            }
+                        });
+                    }
+                });
+
+            </script>
+            {% endfor %}
+            </tbody>
+        </table><!--表单-->
+    </div><!--用户列表-->
+</div>
+{% endblock %}
+

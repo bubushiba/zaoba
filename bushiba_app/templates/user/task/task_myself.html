@@ -1,0 +1,99 @@
+{% extends 'user/muban.html' %}  <!-- 继承基础布局 -->
+
+{% block title %}我的任务{% endblock %}
+
+{% block css %}
+<!-- 基础和任务列表css -->
+<style>
+    body {
+        font-size: 16px;  /* 基准字号从14px提升到16px */
+    }
+    /* 查看按钮 */
+    .edit-btn {
+        border: 1px solid #007bff;
+        color: #007bff;
+        padding: 6px 12px;
+        border-radius: 4px;
+        transition: all 0.3s;
+    }
+    /* 查看按钮动画 */
+    .edit-btn:hover {
+        background: #007bff;
+        color: white;
+        text-decoration: none;
+    }
+
+    /* 任务列表容器 */
+    .task-list {
+        max-width: 1000px;
+        margin: 0 auto;
+        background: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    /* 单个任务项 */
+    .task-item {
+        padding: 15px;
+        border-bottom: 1px solid #eee;
+        transition: background 0.3s;
+    }
+    /* 单个任务项动画 */
+    .task-item:hover {
+        background: #f8f9fa;
+    }
+    /* 状态标签 */
+    .status-badge {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 16px;
+    }
+    .status-unclaimed { background: #ffd700; color: #333; }  /* 未接单-金色 */
+    .status-claimed { background: #20c997; color: #fff; }    /* 已接单-青色 */
+    .status-completed { background: #6c757d; color: #fff; }  /* 已完成-灰色 */
+</style>
+
+{% endblock %}
+
+{% block content %}
+<!-- 任务列表 -->
+<div class="task-list">
+    {% if not data %}
+        <h3>你还没有发布过任务</h3>
+    {% endif %}
+    {% for dep in data %}
+    <!-- 任务项模板 -->
+    <div class="task-item row">
+        <div class="col-md-8">
+            <div class="row">
+                <div class="col-sm-4">
+                    <small class="text-muted">发布人：{{ dep.user }}</small>
+                </div>
+                <div class="col-sm-4">
+                    <small class="text-muted">{{ dep.time }}</small>
+                </div>
+                <div class="col-sm-4">
+                    {% if dep.state == 0 %}
+                    <span class="status-badge status-unclaimed">未接单</span>
+                    {% elif dep.state == 1 %}
+                    <span class="status-badge status-claimed">已接单</span>
+                    {% elif dep.state == 2 %}
+                    <span class="status-badge status-completed">已完成</span>
+                    {% endif %}
+                </div>
+            </div>
+            <h5 class="mt-2">{{ dep.title|truncatechars:20 }}</h5>
+            <p class="text-muted">{{ dep.demand|truncatechars:10 }}</p>
+        </div>
+
+        <div class="col-md-4 text-right">
+            <div class="h5 text-primary">¥ {{ dep.price }}</div>
+            <a href="/user/task/{{ dep.id }}/edit/" class="edit-btn">编辑</a>
+            <a href="/user/task/{{ dep.id }}/del/" class="edit-btn">删除</a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,205 @@
+{% extends 'user/muban.html' %}
+
+{% block title %}分享新鲜事{% endblock %}
+
+{% block css %}
+<style>
+    .dynamic-container {
+        max-width: 600px;
+        margin: 20px auto;
+        padding: 25px;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    }
+
+    .text-input {
+        width: 100%;
+        min-height: 120px;
+        padding: 15px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        margin-bottom: 25px;
+        resize: vertical;
+    }
+
+    .image-upload-group {
+        margin: 20px 0;
+    }
+
+    .upload-item {
+        margin: 15px 0;
+        position: relative;
+    }
+
+    .preview-container {
+        width: 100%;
+        position: relative;
+        border: 2px dashed #007bff;
+        border-radius: 8px;
+        overflow: hidden;
+        transition: all 0.3s;
+    }
+
+    .preview-image {
+        width: 100%;
+        height: auto;
+        display: none; /* 默认隐藏 */
+    }
+
+    .remove-btn {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        background: rgba(255, 68, 68, 0.9);
+        color: white;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 2;
+    }
+
+    .upload-btn {
+        background: #007bff;
+        color: white;
+        padding: 8px 20px;
+        border-radius: 6px;
+        cursor: pointer;
+        margin: 10px 0;
+        display: inline-block;
+        transition: all 0.3s;
+    }
+
+    .submit-btn {
+        background: #007bff;
+        color: white;
+        width: 100%;
+        padding: 14px;
+        border: none;
+        border-radius: 8px;
+        margin-top: 25px;
+        cursor: pointer;
+    }
+    .error {
+        color: red;
+    }
+
+    /* 悬停效果 */
+    .upload-btn:hover {
+        background: #0056b3;
+        transform: translateY(-1px);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dynamic-container">
+    <h2>分享新鲜事</h2>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <textarea class="text-input" name="text" placeholder="✨ 你想说什么...">{{ form.text.value|default:'' }}</textarea>
+        {% if form.text.errors %}<div class="error">{{ form.text.errors.0 }}</div>{% endif %}
+        <div class="image-upload-group">
+            <!-- 图片1 -->
+            <div class="upload-item">
+                <div class="preview-container">
+                    <img class="preview-image" id="preview1" src="#" alt="图片预览">
+                    <div class="remove-btn" onclick="clearImage(1)">×</div>
+                </div>
+                <label class="upload-btn">
+                    选择图片1
+                    <input type="file" name="image1" accept="image/*"
+                           onchange="previewImage(event, 1)" hidden>
+                </label>
+                {% if form.image1.errors %}<div class="error">{{ form.image1.errors.0 }}</div>{% endif %}
+            </div>
+
+            <!-- 图片2 -->
+            <div class="upload-item">
+                <div class="preview-container">
+                    <img class="preview-image" id="preview2" src="#" alt="图片预览">
+                    <div class="remove-btn" onclick="clearImage(2)">×</div>
+                </div>
+                <label class="upload-btn">
+                    选择图片2
+                    <input type="file" name="image2" accept="image/*"
+                           onchange="previewImage(event, 2)" hidden>
+                </label>
+                {% if form.image2.errors %}<div class="error">{{ form.image2.errors.0 }}</div>{% endif %}
+            </div>
+
+            <!-- 图片3 -->
+            <div class="upload-item">
+                <div class="preview-container">
+                    <img class="preview-image" id="preview3" src="#" alt="图片预览">
+                    <div class="remove-btn" onclick="clearImage(3)">×</div>
+                </div>
+                <label class="upload-btn">
+                    选择图片3
+                    <input type="file" name="image3" accept="image/*"
+                           onchange="previewImage(event, 3)" hidden>
+                </label>
+                {% if form.image3.errors %}<div class="error">{{ form.image3.errors.0 }}</div>{% endif %}
+            </div>
+        </div>
+
+        <button type="submit" class="submit-btn">立即发布</button>
+    </form>
+</div>
+
+<script>
+    function previewImage(event, index) {
+        const input = event.target;
+        const preview = document.getElementById(`preview${index}`);
+        const container = preview.parentElement;
+        const removeBtn = container.querySelector('.remove-btn');
+
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+                removeBtn.style.display = 'flex';
+
+                // 动态调整容器尺寸
+                preview.onload = function() {
+                    container.style.maxWidth = `${Math.min(preview.naturalWidth, 800)}px`;
+                    container.style.margin = '10px auto';
+                    container.style.border = 'none'; // 移除虚线边框
+                };
+            }
+
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    function clearImage(index) {
+        const input = document.querySelector(`input[name="image${index}"]`);
+        const preview = document.getElementById(`preview${index}`);
+        const container = preview.parentElement;
+        const removeBtn = container.querySelector('.remove-btn');
+
+        // 重置所有元素状态
+        input.value = '';
+        preview.src = '#';
+        preview.style.display = 'none';
+        removeBtn.style.display = 'none';
+        container.style.maxWidth = '100%';
+        container.style.margin = '0 auto';
+        container.style.border = '2px dashed #007bff'; // 恢复虚线边框
+    }
+</script>
+
+<script>
+    // 发布成功提示
+    {% if add_bool %}
+        alert('发布成功！');
+        window.location.href = "/user/activity/";
+    {% endif %}
+</script>
+{% endblock %}

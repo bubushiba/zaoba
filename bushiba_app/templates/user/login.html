@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<script>
+    var _hmt = _hmt || [];
+    (function () {
+        var hm = document.createElement("script");
+        hm.src = "https://hm.baidu.com/hm.js?c923daf3182a4b0ce01878475080aadc";
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+<head>
+    <meta charset="UTF-8">
+    <title>登录界面 早吧</title>
+    <link rel="stylesheet" href="{% static 'plugins/bootstrap-3.4.1/css/bootstrap.min.css' %}">
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            display: flex;
+            min-height: 100vh;
+        }
+        /* 左侧动画区域 */
+        .left-animation {
+            flex: 1;
+            position: relative;
+            background: black;
+        }
+
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        /* 右侧登录区域 */
+        .right-login {
+            width: 400px;
+            background: #f5f5f5;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            z-index: 1;
+        }
+
+        .login-form {
+            width: 100%;
+        }
+
+        .login-form h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        button, .register-btn{
+            width: 100%;
+            padding: 12px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #45a049;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="left-animation">
+        <canvas></canvas>
+        <canvas></canvas>
+        <canvas></canvas>
+    </div>
+    <div class="right-login">
+        <form class="login-form" method="post" novalidate>
+            {% csrf_token %}
+            <h2>用户登录</h2>
+            <div class="form-group">
+                <label>用户名</label>
+                {{ form.name }}
+                <span style="color: red;">{{ form.name.errors.0 }}</span>
+            </div>
+            <div class="form-group">
+                <label>密码</label>
+                {{ form.password }}
+                <span style="color: red;">{{ form.password.errors.0 }}</span>
+            </div>
+            <div class="form-group">
+            <label>验证码</label>
+            <div class="row">
+                <div class="col-xs-7">
+                    {{ form.code }}
+                       <span style="color: red;">{{ form.code.errors.0 }}</span>
+                </div>
+                <div class="col-xs-5">
+                    <img id="image_code" src="/user/image/code/">
+                </div>
+            </div>
+        </div>
+            <button type="submit">登录</button>
+        </form>
+        <a class="register-btn" style="margin-top: 15px; text-align: center;text-decoration: none;" href="/user/enroll/">注册</a>
+        <a class="register-btn" style="margin-top: 15px; text-align: center;text-decoration: none;" href="/user/visitor/">游客登录</a>
+    </div>
+
+    <script>
+        function GetRequest() {
+            var url = decodeURI(location.search);
+            var theRequest = new Object();
+            if (url.indexOf("?")!= -1) {
+                var str = url.substr(1);
+                strs = str.split("&");
+                for (var i = 0; i < strs.length; i++) {
+                    theRequest[strs[i].split("=")[0]] = unescape(strs[i].split("=")[1]);
+                }
+            }
+            return theRequest;
+        }
+
+        class Shard {
+            constructor(x, y, hue) {
+                this.x = x;
+                this.y = y;
+                this.hue = hue;
+                this.lightness = 50;
+                this.size = 15 + Math.random() * 10;
+                const angle = Math.random() * 2 * Math.PI;
+                const blastSpeed = 1 + Math.random() * 6;
+                this.xSpeed = Math.cos(angle) * blastSpeed;
+                this.ySpeed = Math.sin(angle) * blastSpeed;
+                this.target = getTarget();
+                this.ttl = 100;
+                this.timer = 0;
+            }
+            draw() {
+                ctx2.fillStyle = `hsl(${this.hue}, 100%, ${this.lightness}%)`;
+                ctx2.beginPath();
+                ctx2.arc(this.x, this.y, this.size, 0, 2 * Math.PI);
+                ctx2.closePath();
+                ctx2.fill();
+            }
+            update() {
+                if (this.target) {
+                    const dx = this.target.x - this.x;
+                    const dy = this.target.y - this.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    const a = Math.atan2(dy, dx);
+                    const tx = Math.cos(a) * 5;
+                    const ty = Math.sin(a) * 5;
+                    this.size = lerp(this.size, 1.5, 0.05);
+
+                    if (dist < 5) {
+                        this.lightness = lerp(this.lightness, 100, 0.01);
+                        this.xSpeed = this.ySpeed = 0;
+                        this.x = lerp(this.x, this.target.x + fidelity / 2, 0.05);
+                        this.y = lerp(this.y, this.target.y + fidelity / 2, 0.05);
+                        this.timer += 1;
+                    } else if (dist < 10) {
+                        this.lightness = lerp(this.lightness, 100, 0.01);
+                        this.xSpeed = lerp(this.xSpeed, tx, 0.1);
+                        this.ySpeed = lerp(this.ySpeed, ty, 0.1);
+                        this.timer += 1;
+                    } else {
+                        this.xSpeed = lerp(this.xSpeed, tx, 0.02);
+                        this.ySpeed = lerp(this.ySpeed, ty, 0.02);
+                    }
+                } else {
+                    this.ySpeed += 0.05;
+                    this.size = lerp(this.size, 1, 0.05);
+
+                    if (this.y > c2.height) {
+                        shards.forEach((shard, idx) => {
+                            if (shard === this) {
+                                shards.splice(idx, 1);
+                            }
+                        });
+                    }
+                }
+                this.x = this.x + this.xSpeed;
+                this.y = this.y + this.ySpeed;
+            }
+        }
+
+        class Rocket {
+            constructor() {
+                const quarterW = c2.width / 4;
+                this.x = quarterW + Math.random() * (c2.width - quarterW);
+                this.y = c2.height - 15;
+                this.angle = Math.random() * Math.PI / 4 - Math.PI / 6;
+                this.blastSpeed = 6 + Math.random() * 7;
+                this.shardCount = 15 + Math.floor(Math.random() * 15);
+                this.xSpeed = Math.sin(this.angle) * this.blastSpeed;
+                this.ySpeed = -Math.cos(this.angle) * this.blastSpeed;
+                this.hue = Math.floor(Math.random() * 360);
+                this.trail = [];
+            }
+            draw() {
+                ctx2.save();
+                ctx2.translate(this.x, this.y);
+                ctx2.rotate(Math.atan2(this.ySpeed, this.xSpeed) + Math.PI / 2);
+                ctx2.fillStyle = `hsl(${this.hue}, 100%, 50%)`;
+                ctx2.fillRect(0, 0, 5, 15);
+                ctx2.restore();
+            }
+            update() {
+                this.x = this.x + this.xSpeed;
+                this.y = this.y + this.ySpeed;
+                this.ySpeed += 0.1;
+            }
+
+            explode() {
+                for (let i = 0; i < 70; i++) {
+                    shards.push(new Shard(this.x, this.y, this.hue));
+                }
+            }
+        }
+
+        // INITIALIZATION
+        const [c1, c2, c3] = document.querySelectorAll('canvas');
+        const [ctx1, ctx2, ctx3] = [c1, c2, c3].map(c => c.getContext('2d'));
+        let fontSize = 200;
+        const rockets = [];
+        const shards = [];
+        const targets = [];
+        const fidelity = 3;
+        let counter = 0;
+        c2.width = window.innerWidth - 400; // 为登录区域留出空间
+        c2.height = window.innerHeight;
+        c3.width = c2.width;
+        c3.height = c2.height;
+        ctx1.fillStyle = '#FF69B4'; // 设置粉色字体
+
+        let text = ['welcome to', '早吧'];
+        let textWidth = 0;
+
+        while (true) {
+            ctx1.font = `900 ${fontSize}px Arial`;
+            const line1Width = ctx1.measureText(text[0]).width;
+            const line2Width = ctx1.measureText(text[1]).width;
+            textWidth = Math.max(line1Width, line2Width);
+            if (textWidth <= (window.innerWidth - 400) * 0.6 || fontSize <= 20) break;
+            fontSize -= 2;
+        }
+
+        c1.width = textWidth;
+        c1.height = fontSize * 2.5;
+        ctx1.font = `900 ${fontSize}px Arial`;
+        ctx1.fillText(text[0], 0, fontSize);
+        ctx1.fillText(text[1], 0, fontSize * 2);
+
+        const imgData = ctx1.getImageData(0, 0, c1.width, c1.height);
+        for (let i = 0, max = imgData.data.length; i < max; i += 4) {
+            const alpha = imgData.data[i + 3];
+            const x = Math.floor(i / 4) % imgData.width;
+            const y = Math.floor(i / 4 / imgData.width);
+
+            if (alpha && x % fidelity === 0 && y % fidelity === 0) {
+                targets.push({ x, y });
+            }
+        }
+
+        ctx3.fillStyle = '#FFF';
+        ctx3.shadowColor = '#FFF';
+        ctx3.shadowBlur = 25;
+        let animationFrameId;
+
+        function startAnimation() {
+            (function loop() {
+                ctx2.fillStyle = "rgba(0, 0, 0,.1)";
+                ctx2.fillRect(0, 0, c2.width, c2.height);
+                counter += 1;
+
+                if (counter % 15 === 0) {
+                    rockets.push(new Rocket());
+                }
+                rockets.forEach((r, i) => {
+                    r.draw();
+                    r.update();
+                    if (r.ySpeed > 0) {
+                        r.explode();
+                        rockets.splice(i, 1);
+                    }
+                });
+
+                shards.forEach((s, i) => {
+                    s.draw();
+                    s.update();
+
+                    if (s.timer >= s.ttl || s.lightness >= 99) {
+                        ctx3.fillRect(s.target.x, s.target.y, fidelity + 1, fidelity + 1);
+                        shards.splice(i, 1);
+                    }
+                });
+                animationFrameId = requestAnimationFrame(loop);
+            })();
+        }
+
+        startAnimation();
+
+        const lerp = (a, b, t) => Math.abs(b - a) > 0.1? a + t * (b - a) : b;
+
+        function getTarget() {
+            if (targets.length > 0) {
+                const idx = Math.floor(Math.random() * targets.length);
+                let { x, y } = targets[idx];
+                targets.splice(idx, 1);
+
+                x += c2.width / 2 - textWidth / 2;
+                y += c2.height / 2 - fontSize * 1.25;
+
+                return { x, y };
+            }
+        }
+    </script>
+</body>
+
+</html>

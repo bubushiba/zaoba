@@ -1,0 +1,778 @@
+{% extends 'user/muban.html' %}
+
+{% block title %}动态详情{% endblock %}
+
+{% block css %}
+<!-- 动态列表样式 -->
+<style>
+        .post-container {
+            max-width: 680px;
+            margin: 0 auto;
+        }
+
+        .post {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            margin-right: 12px;
+            object-fit: cover;
+        }
+
+        .username {
+            font-weight: 600;
+            color: #1d2129;
+            margin: 0;
+        }
+
+        .post-content {
+            color: #1d2129;
+            margin-bottom: 12px;
+            word-break: break-word;
+        }
+
+        .image-grid {
+            display: grid;
+            gap: 8px;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        /* 不同图片数量的布局 */
+        .image-grid[data-count="1"] {
+            grid-template-columns: 1fr;
+            max-width: 80%;
+        }
+
+        .image-grid[data-count="2"] {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .image-grid[data-count="3"] {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        .post-image {
+            width: 100%;
+            height: 0;
+            padding-bottom: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .post-image img {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+
+
+
+</style>
+
+<!-- 点赞和评论 -->
+<style>
+    /* 新增操作按钮样式 */
+    .action-buttons {
+        position: absolute;
+        bottom: 15px;
+        right: 15px;
+        display: flex;
+        gap: 12px;
+    }
+
+    .action-btn {
+        display: flex;
+        align-items: center;
+        padding: 8px 15px;
+        border-radius: 20px;
+        background: #f5f5f5;
+        color: #666;
+        transition: all 0.2s;
+        cursor: pointer;
+        border: none;
+    }
+
+    .action-btn:hover {
+        background: #007bff;
+        color: white;
+        transform: translateY(-1px);
+    }
+
+    .action-btn i {
+        margin-right: 6px;
+        font-size: 16px;
+    }
+
+    /* 调整原有布局 */
+    .post {
+        position: relative;  /* 为绝对定位按钮提供参考 */
+        padding-bottom: 60px; /* 给按钮留出空间 */
+    }
+
+
+
+
+</style>
+
+<!-- 点赞样式 -->
+<style>
+    /* 修改后的点赞按钮样式 */
+    .like-btn i {
+        color: #666; /* 默认灰色 */
+        font-weight: 900; /* 强制使用实心图标 */
+        transition: color 0.3s ease;
+    }
+
+    .like-btn.active i {
+        color: #ff4757 !important; /* 激活状态红色 */
+    }
+
+    .like-btn .fas {
+        display: inline-block; /* 显示实心图标 */
+    }
+
+
+
+
+</style>
+
+<!-- 评论样式 -->
+<style>
+.comment-section {
+    max-width: 780px;
+    margin: 0 auto;
+    margin-top: 24px;
+    background: #fff;
+    padding: 20px;
+    border-radius: 12px;
+}
+
+.comment-title {
+    font-size: 18px;
+    margin-bottom: 16px;
+    color: #1d2129;
+}
+
+.comments-list {
+    margin-bottom: 20px;
+}
+
+.comment-item {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.comment-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%; /* 正圆头像 */
+}
+
+.comment-content-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.comment-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.comment-username {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1d2129;
+}
+
+.comment-time {
+    font-size: 12px;
+    color: #888;
+}
+
+.comment-text {
+    font-size: 16px;
+    line-height: 1.8;
+    color: #333;
+    margin: 0;
+}
+
+.comment-form {
+    display: flex;
+    gap: 12px;
+}
+
+.comment-input {
+    flex: 1;
+    padding: 1px 15px; /* 减小上下内边距 */
+    min-height: 34px; /* 降低高度 */
+    border: 2px solid #eee;
+    border-radius: 24px;
+    font-size: 14px;
+}
+
+.comment-submit-btn {
+    padding: 16px 32px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 24px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.comment-submit-btn:hover {
+    background: #0056b3;
+    transform: translateY(-1px);
+}
+
+
+
+
+</style>
+
+<!-- 评论点赞样式 -->
+<style>
+        .comment-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+            align-items: center;
+        }
+
+       .comment-like-btn {
+            display: flex;
+            align-items: center;
+            padding: 4px 8px;
+            border-radius: 16px;
+            background: #f8f9fa;
+            color: #666;
+            transition: all 0.2s;
+            cursor: pointer;
+            border: none;
+        }
+
+       .comment-like-btn:hover {
+            background: #e9ecef;
+        }
+
+       .comment-like-btn.active {
+            /* 这里可以移除背景色的修改，保持默认背景色 */
+            background: #f8f9fa;
+        }
+
+       .comment-like-btn.active i {
+            color: #ff4757; /* 设置爱心图标在激活状态下的颜色 */
+        }
+
+       .comment-like-btn i {
+            margin-right: 4px;
+            font-size: 14px;
+        }
+
+
+
+
+</style>
+
+<!-- 查看图片 -->
+<style>
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.9);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+            animation-name: zoom;
+            animation-duration: 0.6s;
+        }
+
+        @keyframes zoom {
+            from {
+                transform: scale(0.1);
+            }
+
+            to {
+                transform: scale(1);
+            }
+        }
+
+        .close {
+            position: absolute;
+            top: 15px;
+            right: 35px;
+            color: #f1f1f1;
+            font-size: 40px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: #bbb;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+</style>
+{% endblock %}
+
+
+{% block content %}
+<!-- 动态信息 -->
+<div class="post-container">
+    <div class="post" data-post-id="{{ activity.id }}">
+        <div class="user-info">
+            <a href="/user/friend/{{ activity.user.id }}/see/" style="text-decoration: none;" target="_blank">
+                <img src="{{ activity.user.avatar.url }}" class="avatar" alt="用户头像">
+            </a>
+            <h3 class="username">{{ activity.user }}</h3>
+        </div>
+        <div class="col-sm-4">
+            <small class="text-muted">发布时间：{{ activity.time }}</small>
+        </div>
+        <br>
+        <div>
+            <p class="post-content">{{ activity.text }}</p>
+            <div class="image-grid" data-count="3">
+                {% if activity.image1 %}
+                <div class="post-image"><img src="/media/{{ activity.image1 }}" alt="图片1"></div>
+                {% endif %}
+                {% if activity.image2 %}
+                <div class="post-image"><img src="/media/{{ activity.image2 }}" alt="图片1"></div>
+                {% endif %}
+                {% if activity.image3 %}
+                <div class="post-image"><img src="/media/{{ activity.image3 }}" alt="图片1"></div>
+                {% endif %}
+            </div>
+            <!-- 查看图片 -->
+            <div id="modal" class="modal">
+                <span class="close">&times;</span>
+                <img class="modal-content" src="" alt="全屏图片">
+            </div>
+        </div>
+        <!-- 操作按钮 -->
+        <div class="action-buttons">
+            <button class="action-btn like-btn">
+                <i class="fas fa-heart"></i>
+                <div class="like-text"><span class="like-count"></span></div>
+            </button>
+            <button class="action-btn" data-post-id="{{ activity.id }}">
+                <i class="fas fa-comment"></i><span class="comment-count"></span>
+            </button>
+        </div>
+    </div>
+</div>
+
+
+<!-- 评论区容器 -->
+<div class="comment-section" data-post-id="{{ activity.id }}">
+    <!-- 评论输入框 -->
+    <form method="post" novalidate>
+        {% csrf_token %}
+        <div class="comment-form">
+            <textarea class="comment-input" placeholder="写下你的评论..." name="text">{% if form.text.value %}{{ form.text.value }}{% endif %}</textarea>
+            <button class="comment-submit-btn" data-post-id="{{ activity.id }}">提交评论</button>
+        </div>
+        {% if form.text.errors %}
+        <span style="color: red;">{{ form.text.errors.0 }}</span>
+        {% endif %}
+    </form>
+    <br>
+    <!-- 评论列表 -->
+    <div class="comments-list" id="comments-list">
+        {% if not comment %}
+        <h5 style="text-align: center;">暂无评论</h5>
+        {% endif %}
+
+        {% for dep in comment %}
+        <div class="comment-item">
+            <a href="/user/friend/{{ dep.user.id }}/see/">
+                <img src="{{ dep.user.avatar.url }}" alt="头像" class="comment-avatar">
+            </a>
+            <div class="comment-content-wrapper">
+                <div class="comment-header">
+                    <span class="comment-username">{{ dep.user }}</span>
+                    <span class="comment-time">{{ dep.time }}</span>
+                </div>
+                <p class="comment-text">{{ dep.text }}</p>
+            </div>
+            <!-- 新增点赞按钮 -->
+            <div class="comment-actions" data-post-id="{{ dep.id }}">
+                <button class="comment-like-btn like-btn">
+                    <i class="far fa-heart"></i>
+                    <span class="comment-like-count"></span>
+                </button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+
+{% block js %}
+<!-- 动态点赞的样式变换 -->
+<script>
+document.querySelectorAll('.like-btn').forEach(button => {
+    button.addEventListener('click', function(e) {
+        const postId = this.closest('.post').dataset.postId;
+        e.preventDefault();
+        const icon = this.querySelector('i');
+        const countElement = this.querySelector('.like-count');
+
+        // 从页面获取当前计数（转换为数字）
+        let currentCount = parseInt(countElement.textContent);
+
+        // 切换状态
+        this.classList.toggle('active');
+        icon.classList.toggle('fas');
+        icon.classList.toggle('far');
+
+        // 更新计数逻辑
+        if (this.classList.contains('active')) {
+            currentCount += 1; // 点赞时增加
+        } else {
+            currentCount = Math.max(currentCount - 1, 0); // 取消点赞时减少，最低为0
+        }
+
+        // 更新页面显示
+        countElement.textContent = currentCount;
+
+        // 发送AJAX请求
+        $.ajax({
+            url: `/user/activity/${ postId }/liker/`, // 直接使用动态ID拼接URL
+            type: 'GET',
+            dataType: 'json'
+        });
+    });
+});
+
+
+
+
+</script>
+
+<!-- 动态评论点赞的样式变换 -->
+<script>
+    $(document).on('click', '.comment-like-btn', function(e) {
+        const postId = this.closest('.comment-actions').dataset.postId;
+        e.preventDefault();
+        const icon = this.querySelector('i');
+        const countElement = this.querySelector('.comment-like-count');
+
+        // 从页面获取当前计数（转换为数字）
+        let currentCount = parseInt(countElement.textContent);
+
+        // 切换状态
+        this.classList.toggle('active');
+        icon.classList.toggle('fas');
+        icon.classList.toggle('far');
+
+        // 更新计数逻辑
+        if (this.classList.contains('active')) {
+            currentCount += 1; // 点赞时增加
+        } else {
+            currentCount = Math.max(currentCount - 1, 0); // 取消点赞时减少，最低为0
+        }
+
+        // 更新页面显示
+        countElement.textContent = currentCount;
+
+        // 发送AJAX请求
+        $.ajax({
+            url: `/user/activity/comment/${ postId }/liker/`, // 直接使用动态ID拼接URL
+            type: 'GET',
+            dataType: 'json'
+        });
+    });
+
+
+
+</script>
+
+<!-- 加载动态时，获取点赞次数和评论数量 -->
+<script>
+$(document).ready(function() {
+    $('.post').each(function() {
+        const $post = $(this);
+        const postId = $post.data('post-id'); // 从data属性获取动态ID
+        // 发送AJAX请求
+        $.ajax({
+            url: `/user/activity/${ postId }/likes/`, // 直接使用动态ID拼接URL
+            type: 'GET',
+            dataType: 'json',
+            success: function(res) {
+                $post.find('.like-count').text(res.like_count || 0);
+                $post.find('.comment-count').text(res.comment_count || 0);
+
+                // 根据后端返回的isbool值设置图标
+                const $likeBtn = $post.find('.like-btn');
+                if (res.isbool) {
+                    $likeBtn.addClass('active');
+                    $likeBtn.find('i').removeClass('far').addClass('fas');
+                } else {
+                    $likeBtn.removeClass('active');
+                    $likeBtn.find('i').removeClass('fas').addClass('far');
+                }
+            },
+            error: function(xhr) {
+                $post.find('.like-count').text('加载失败');
+                $post.find('.comment-count').text('加载失败');
+                console.error('请求失败:', xhr.status);
+            }
+        });
+    });
+});
+
+
+
+
+</script>
+
+<!-- 加载动态评论时，获取点赞次数 -->
+<script>
+function initPostMetadata() {
+    $('.comment-actions').each(function() {
+        const $post = $(this);
+        const postId = $post.data('post-id'); // 从data属性获取动态ID
+        // 发送AJAX请求
+        $.ajax({
+            url: `/user/activity/comment/${ postId }/likes/`, // 直接使用动态ID拼接URL
+            type: 'GET',
+            dataType: 'json',
+            success: function(res) {
+                $post.find('.comment-like-count').text(res.like_count || 0);
+
+                // 根据后端返回的isbool值设置图标
+                const $likeBtn = $post.find('.like-btn');
+                if (res.isbool) {
+                    $likeBtn.addClass('active');
+                    $likeBtn.find('i').removeClass('far').addClass('fas');
+                } else {
+                    $likeBtn.removeClass('active');
+                    $likeBtn.find('i').removeClass('fas').addClass('far');
+                }
+            },
+            error: function(xhr) {
+                $post.find('.like-count').text('加载失败');
+                console.error('请求失败:', xhr.status);
+            }
+        });
+    });
+}
+
+
+
+
+</script>
+
+<!-- 滚动加载更多数据 -->
+<script>
+let currentPage = 2;
+let hasNext = true;
+let isLoading = false;
+
+// 新增提示元素模板
+const loadingTemplate = `
+    <div id="loading-indicator" style="display: none; text-align: center; padding: 20px;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">加载中...</span>
+        </div>
+        <p class="mt-2">正在加载更多内容...</p>
+    </div>
+`;
+
+const noMoreTemplate = `
+    <div id="no-more-content" style="display: none; text-align: center; padding: 20px; color: #6c757d;">
+        已经到底啦~
+    </div>
+`;
+
+// 初始化提示元素
+function initLoadingIndicators() {
+    if ($('#loading-indicator').length === 0) {
+        $('body').append(loadingTemplate);
+    }
+    if ($('#no-more-content').length === 0) {
+        $('body').append(noMoreTemplate);
+    }
+}
+
+// 显示加载提示
+function showLoading() {
+    $('#loading-indicator').fadeIn();
+}
+
+// 隐藏加载提示
+function hideLoading() {
+    $('#loading-indicator').fadeOut();
+}
+
+// 显示无更多内容提示
+function showNoMore() {
+    $('#no-more-content').fadeIn();
+    // 移除滚动监听
+    $(window).off('scroll');
+}
+
+function loadMoreData() {
+    if (!hasNext || isLoading) return;
+
+    isLoading = true;
+    showLoading();
+    const activityId = {{ activity.id }};
+
+    $.ajax({
+        url: `/user/activity/${activityId}/see/?page=${currentPage}`,
+        method: 'GET',
+        dataType: 'json',
+        success: function(response) {
+            const container = $('#comments-list');
+            response.data.forEach(comment => {
+                const post = `
+                    <div class="comment-item">
+                        <a href="/user/friend/${comment.user.id}/see/">
+                            <img src="${comment.user.avatar}" alt="头像" class="comment-avatar">
+                        </a>
+                        <div class="comment-content-wrapper">
+                            <div class="comment-header">
+                                <span class="comment-username">${comment.user.name}</span>
+                                <span class="comment-time">${comment.time}</span>
+                            </div>
+                            <p class="comment-text">${comment.text}</p>
+                        </div>
+                        <!-- 新增点赞按钮 -->
+                        <div class="comment-actions" data-post-id="${comment.id}">
+                            <button class="comment-like-btn like-btn">
+                                <i class="far fa-heart"></i>
+                                <span class="comment-like-count"></span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                container.append(post);
+
+            });
+            hasNext = response.has_next;
+            currentPage++;
+            isLoading = false;
+            hideLoading();
+            initPostMetadata();
+
+            if (!hasNext) {
+                showNoMore();
+            }
+        },
+        error: function(error) {
+            hideLoading();
+            console.error('加载失败:', error);
+            // 可以添加重试逻辑
+        }
+    });
+}
+
+// 初始化提示元素
+initLoadingIndicators();
+
+// 优化后的滚动处理（带节流）
+let lastScrollTime = 0;
+$(window).scroll(function() {
+    const now = Date.now();
+    if (now - lastScrollTime < 200) return;
+    lastScrollTime = now;
+
+    const scrollPosition = $(window).scrollTop() + $(window).height();
+    const bottomPosition = $(document).height() - 100;
+
+    if (scrollPosition >= bottomPosition && !isLoading && hasNext) {
+        loadMoreData();
+    }
+});
+
+
+
+</script>
+
+<!-- 初始化页面已有内容 -->
+<script>
+$(document).ready(function() {
+    initPostMetadata();
+});
+
+
+
+</script>
+
+<!-- 查看图片 -->
+<script>
+        var modal = document.getElementById("modal");
+        var closeBtn = document.getElementsByClassName("close")[0];
+        var images = document.querySelectorAll(".image-grid img");
+        var modalImg = document.querySelector(".modal-content");
+
+        images.forEach(function (image) {
+            image.addEventListener("click", function () {
+                var imgSrc = this.src;
+                modal.style.display = "flex";
+                modalImg.src = imgSrc;
+            });
+        });
+
+        closeBtn.addEventListener("click", function () {
+            modal.style.display = "none";
+        });
+
+        modal.addEventListener("click", function (event) {
+            if (event.target === modal) {
+                modal.style.display = "none";
+            }
+        });
+
+        modalImg.addEventListener('wheel', function (e) {
+            e.preventDefault();
+            var delta = e.deltaY;
+            var scale = 1.1;
+            if (delta < 0) {
+                scale = 1 / scale;
+            }
+            var transform = window.getComputedStyle(this).transform;
+            var matrix = new DOMMatrixReadOnly(transform);
+            var currentScale = matrix.m11;
+            var newScale = currentScale * scale;
+            this.style.transform = `scale(${newScale})`;
+        });
+
+</script>
+{% endblock %}

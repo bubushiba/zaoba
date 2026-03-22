@@ -1,0 +1,252 @@
+{% extends 'user/muban.html' %}  <!-- 继承基础布局 -->
+
+{% block title %}交友大厅{% endblock %}
+
+{% block css %}
+<!-- 交友列表css -->
+<style>
+        .user-card {
+            border: 1px solid #e8e8e8;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: transform 0.2s;
+            background: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .user-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .user-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #fff;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        .gender-icon {
+            font-size: 1.4em;
+            margin-right: 8px;
+        }
+        .male {
+            color: #2196F3;
+        }
+        .female {
+            color: #E91E63;
+        }
+        .school-info {
+            color: #666;
+            font-size: 0.95em;
+            margin: 8px 0;
+        }
+        .age-badge {
+            background: #f3f4f6;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.9em;
+            display: inline-block;
+        }
+        .add-btn {
+            width: 100px;
+            margin: 0 auto;
+            padding: 8px;
+            border-radius: 20px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .add-btn:hover {
+            opacity: 0.9;
+        }
+
+</style>
+
+<!-- 搜索框css -->
+<style>
+    /* 搜索框主容器 */
+    .search-container {
+        margin: 20px 0;        /* 上下20px间距，左右0保持靠左 */
+        width: fit-content;    /* 宽度自适应内容，实现靠左对齐 */
+    }
+
+    /* 搜索表单容器 */
+    .search-form {
+        display: flex;
+        max-width: 800px;      /* 增大最大宽度适应图片布局 */
+        margin-left: 0;        /* 取消自动居中，强制靠左 */
+        border-radius: 30px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        overflow: hidden;
+        background: white;
+        border: 1px solid #ddd; /* 添加浅灰色边框匹配图片效果 */
+    }
+
+    /* 输入框样式 */
+    .search-input {
+        flex: 1;
+        border: none;
+        padding: 12px 25px;
+        font-size: 16px;
+        outline: none;
+        min-width: 400px;       /* 设置最小宽度匹配图片比例 */
+        color: #333;            /* 深灰色文字更清晰 */
+    }
+
+    /* 搜索按钮优化 */
+    .search-button {
+        background: #007bff;
+        color: white;
+        border: none;
+        padding: 12px 35px;     /* 增大左右内边距匹配图片比例 */
+        min-width: 120px;       /* 加宽按钮匹配图片尺寸 */
+        cursor: pointer;
+        transition: all 0.3s;   /* 添加过渡动画 */
+        font-weight: 500;        /* 中等字重提升可读性 */
+        letter-spacing: 1px;     /* 字间距优化 */
+    }
+
+    /* 按钮悬停状态 */
+    .search-button:hover {
+        background: #0056b3;
+        transform: translateY(-1px); /* 添加轻微悬浮效果 */
+        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    /* 移动端适配 */
+    @media (max-width: 576px) {
+        .search-input {
+            padding: 10px 20px;
+            font-size: 14px;
+        }
+        .search-button {
+            padding: 10px 15px;
+            min-width: 80px;
+        }
+    }
+
+</style>
+
+<!-- 筛选框css -->
+<style>
+    /* 筛选容器 */
+    .filter-container {
+        display: flex;
+        gap: 15px;
+        margin: 20px 0;
+        align-items: center;
+    }
+
+    /* 筛选框样式 */
+    .status-filter {
+        width: 150px;
+        border: 1px solid #20c997;
+        border-radius: 20px;
+        padding: 10px 15px;
+        background: white;
+        color: #333;
+        margin-left: auto; /* 靠右对齐 */
+        transition: all 0.3s;
+        cursor: pointer;
+    }
+
+    /* 移动端适配 */
+    @media (max-width: 768px) {
+        .filter-container {
+            flex-direction: column;
+        }
+        .status-filter {
+            width: 100%;
+            margin-left: 0;
+        }
+    }
+
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- 搜索框 -->
+<div class="container">
+    <form method="get" class="filter-container">
+        <!-- 原搜索框 -->
+        <div class="search-container">
+            <div class="search-form">
+                <input type="text"
+                       class="search-input"
+                       name="keyword"
+                       placeholder="搜索用户名或ID..."
+                       value="{{ request.GET.keyword }}">
+                <button type="submit" class="search-button">
+                    <i class="fas fa-search"></i> 搜索
+                </button>
+            </div>
+        </div>
+        <!-- 性别筛选框 -->
+        <select class="status-filter"
+                name="sex"
+                onchange="this.form.submit()">
+            <option value=" ">性别</option>
+            <option value="1" {% if sex == '1' %}selected{% endif %}>男</option>
+            <option value="0" {% if sex == '0' %}selected{% endif %}>女</option>
+        </select>
+        <!-- 学校筛选框 -->
+        <select class="status-filter"
+                name="school"
+                onchange="this.form.submit()">
+            <option value=" ">学校</option>
+            <option value="{{ request.session.info.scl_id }}"
+                    {% if scl_bool %}
+                    selected
+                    {% endif %}>同校
+            </option>
+        </select>
+    </form>
+</div>
+
+
+<!-- 交友列表 -->
+<div class="container py-5">
+    <div class="row">
+        {% if not data %}
+        <hr width="1500" align="left" color="red" size="10"/>
+        <h5 style="text-align: center;">暂无数据</h5>
+        {% endif %}
+        {% for dep, state in data %}
+        <div class="col-md-4">
+            <a href="/user/friend/{{ dep.id }}/see/" style="text-decoration: none;" target="_blank">
+                <div class="user-card">
+                    <div class="text-center">
+                        <img src="/media/{{ dep.avatar }}" class="user-avatar" alt="用户头像">
+                    </div>
+                    <h4 class="text-center mt-3 mb-1">{{ dep.name }}</h4>
+                    <div class="text-center">
+                        {% if dep.sex == 0 %}
+                        <span class="gender-icon female">♀</span>
+                        {% else %}
+                        <span class="gender-icon male">♂</span>
+                        {% endif %}
+                        <span class="age-badge">{{ dep.age }}岁</span>
+                    </div>
+                    <p class="school-info text-center">
+                        {% if dep.school.school %}
+                        {{ dep.school.school }}
+                        {% else %}
+                        未填写学校
+                        {% endif %}
+                    </p>
+                <button class="add-btn">{{ state }}</button>
+                </div>
+            </a>
+
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+

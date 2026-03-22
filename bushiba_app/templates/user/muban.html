@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'plugins/bootstrap-3.4.1/css/bootstrap.min.css' %}">
+</head>
+<style>
+    .navbar{
+        border-radius:0;
+        background-color: #00c3ff;  /* 导航栏颜色 */
+        color: #ffffff;
+    }
+    .navbar-default .navbar-nav > li > a {
+    color: #ffffff;  /* 浅蓝白色 */
+    }
+    .task - table td {
+    width: 200px; /* 设置合适的宽度，可按需调整 */
+    white - space: nowrap;
+    overflow: hidden;
+    text - overflow: ellipsis;
+    }
+    .rounded-circle {
+    width: 50px;        /* 头像宽度 */
+    height: 50px;       /* 头像高度（与宽度相同） */
+    border-radius: 50%;  /* 关键属性，将直角变为圆形 */
+    object-fit: cover;   /* 保持图片比例，填充容器 */
+    }
+</style>
+{% block css %}{% endblock %}
+<body>
+<div class="navbar navbar-default">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+                    data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <p class="navbar-brand" style="font-size:30px;line-height:45px;color: #ffffff;">www.早吧.com</p>
+        </div>
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav navbar-left">
+                <li><a class="navbar-brand" style="font-size:25px;line-height:45px;" href="/user/welcome/">首页</a></li>
+                <li><a class="navbar-brand" style="font-size:25px;line-height:45px;" href="/user/task/">任务广场</a>
+                </li>
+                <li><a class="navbar-brand" style="font-size:25px;line-height:45px;" href="/user/friend/">交友大厅</a>
+                </li>
+                <li><a class="navbar-brand" style="font-size:25px;line-height:45px;" href="/user/activity/">动态瞬间</a>
+                </li>
+                <li><a class="navbar-brand" style="font-size:25px;line-height:45px;" href="/user/production/">作品展</a>
+                </li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li><a class="navbar-brand" style="font-size:25px;line-height:45px;" href="/user/chat/">消息</a></li>
+                <li class="dropdown" style="line-height:60px;">
+                    <a href="/user/myself/" title="个人信息">
+                        <img src="/media/{{ request.session.info.avatar }}" alt="头像" class="rounded-circle">
+                    </a>
+                </li>
+                <li class="dropdown">
+                    <div style="line-height:60px;font-size:20px;line-height:80px;" id="user">
+                        {{ request.session.info.user }}<span class="caret"></span>
+                    </div>
+                    <ul id="logout" class="dropdown-menu" style="display:none">
+                        <li><a href="/user/myself/">我的主页</a></li>
+                        <li><a href="/user/myself/task/">我的任务</a></li>
+                        <li><a href="/user/logout/">退出登录</a></li>
+                    </ul>
+                    <script>
+                        let timeoutId; // 用于存储定时器的ID，方便后续清除定时器
+
+                        // 鼠标经过显示表单
+                        user.onmouseover = function () {
+                            clearTimeout(timeoutId); // 鼠标移入时，清除可能存在的定时器（避免之前延迟隐藏的定时器生效）
+                            logout.style.display = "block";    // 显示编辑表单
+                        }
+                        // 鼠标离开启动延迟隐藏表单
+                        user.onmouseout = function () {
+                            timeoutId = setTimeout(function () {
+                                logout.style.display = "none";    // 延迟1秒后隐藏表单
+                            }, 1000); // 1000毫秒
+                        }
+                    </script>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+<div class="container">
+    {% block content %}{% endblock %}
+</div>
+</body>
+</html>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.4/dist/jquery.min.js"></script>
+<script src="{% static 'plugins/bootstrap-3.4.1/js/bootstrap.min.js' %}"></script>
+{% block js %}{% endblock %}

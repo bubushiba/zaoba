@@ -1,0 +1,52 @@
+{% extends 'admin/muban.html' %}
+
+{% block title %}{{ name }}用户{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title"> {{ name }}用户 </h3>
+        </div>
+        <div class="panel-body">
+            <form id="formadd">
+                {% for field in form %}
+                <div class="form-group" id="{{ field.name }}">
+                    <label>{{ field.label }}</label>
+                    {{ field }}
+                    <span style="color: red;"></span>
+                </div>
+                {% endfor %}
+                <button id="add" type="button" class="btn btn-primary">提交</button>
+            </form>
+
+        </div>
+    </div>
+</div>  <!--发布任务-->
+{% endblock %}
+
+{% block js %}
+<script type="text/javascript">
+        add.onclick = function() {
+            $.ajax({
+                url: "/admin/user/{{ url }}/",
+                type: "post",
+                data: $("#formadd").serialize(),
+                dataType: "JSON",
+                success: function(res) {
+                    if(res.status) {
+                        alert("{{ name }}成功");
+                        window.location.href = "/admin/user/list/";
+                    } else {
+                        console.log(res.error);
+                        $.each(res.error, function (name, data) {
+                            $("#id_" + name).next().text(data[0]);
+                            // .next() 获取下一个标签
+                            // .text(data[0]) 获取文本，改为data[0]
+                        })
+                    }
+                }
+            })
+        }
+</script>
+{% endblock %}

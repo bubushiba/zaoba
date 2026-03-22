@@ -1,0 +1,40 @@
+{% extends 'user/muban.html' %}
+
+{% block title %}个人信息{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title">个人信息</h3>
+        </div>
+        <div class="panel-heading">
+            <h4 class="panel-title">ID:{{ request.session.info.id }}</h4>
+        </div>
+        <div class="panel-body">
+
+            <form method="post" novalidate>
+                {% csrf_token %}
+                {% for field in form %}
+                <div class="form-group">
+                    <label>{{ field.label }}</label>
+                    {{ field }}
+                    <span style="color: red;">{{ field.errors.0 }}</span>
+                </div>
+                {% endfor %}
+                <button type="submit" class="btn btn-primary">修改</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block js %}
+<script>
+    // 检查注册是否成功
+    {% if edit_bool %}
+        alert('修改成功！');
+        window.location.href = "/user/welcome/";
+    {% endif %}
+</script>
+{% endblock %}

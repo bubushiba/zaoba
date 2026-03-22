@@ -1,0 +1,55 @@
+{% extends 'admin/muban.html' %}
+
+{% block title %}{{ name }}任务{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title"> {{ name }}任务 </h3>
+        </div>
+        <div class="panel-body">
+            <form id="formadd" enctype="multipart/form-data">
+                {% for field in form %}
+                <div class="form-group">
+                    <label>{{ field.label }}</label>
+                    {{ field }}
+                    <span style="color: red;"></span>
+                </div>
+                {% endfor %}
+                <button id="add" type="button" class="btn btn-primary">提交</button>
+            </form>
+
+        </div>
+    </div>
+</div>  <!--发布任务-->
+{% endblock %}
+
+{% block js %}
+<script type="text/javascript">
+        add.onclick = function() {
+            var formData = new FormData(document.getElementById('formadd')); // 创建 FormData 对象
+            $.ajax({
+                url: "/admin/task/{{ url }}/",
+                type: "post",
+                data: formData,
+                processData: false, // 告诉 jQuery 不要处理数据
+                contentType: false, // 告诉 jQuery 不要设置 contentType
+                dataType: "JSON",
+                success: function(res) {
+                    if(res.status) {
+                        alert("{{ name }}成功");
+                        window.location.href = "/admin/task/list/";
+                    } else {
+                        console.log(res.error);
+                        $.each(res.error, function (name, data) {
+                            $("#id_" + name).next().text(data[0]);
+                            // .next() 获取下一个标签
+                            // .text(data[0]) 获取文本，改为data[0]
+                        })
+                    }
+                }
+            })
+        }
+</script>
+{% endblock %}

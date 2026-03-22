@@ -1,0 +1,212 @@
+{% extends 'user/muban.html' %}
+
+{% block title %}任务详情 - {{ task.title }}{% endblock %}
+
+{% block css %}
+<style>
+    /* 详情页容器 */
+    .task-detail {
+        max-width: 800px;
+        margin: 30px auto;
+        padding: 25px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    /* 发布人信息 */
+    .publisher-info {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    /* 圆形头像 */
+    .avatar {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-right: 15px;
+    }
+
+    /* 任务图片 */
+    .task-image {
+        width: 100%;
+        max-height: 400px;
+        object-fit: contain;
+        border-radius: 8px;
+        margin: 15px 0;
+    }
+
+    /* 价格标签 */
+    .price-tag {
+        font-size: 24px;
+        color: #007bff;
+        margin: 20px 0;
+    }
+
+    /* 状态标签 */
+    .status-badge {
+        display: inline-block;
+        padding: 8px 15px;
+        border-radius: 20px;
+        font-size: 16px;
+    }
+    .status-0 { background: #ffd700; color: #333; }  /* 未接单 */
+    .status-1 { background: #20c997; color: #fff; }   /* 已接单 */
+    .status-2 { background: #6c757d; color: #fff; }   /* 已完成 */
+
+
+</style>
+
+<!-- 查看图片 -->
+<style>
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.9);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+            animation-name: zoom;
+            animation-duration: 0.6s;
+        }
+
+        @keyframes zoom {
+            from {
+                transform: scale(0.1);
+            }
+
+            to {
+                transform: scale(1);
+            }
+        }
+
+        .close {
+            position: absolute;
+            top: 15px;
+            right: 35px;
+            color: #f1f1f1;
+            font-size: 40px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: #bbb;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+
+
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="task-detail">
+    <!-- 发布人信息 -->
+    <div class="publisher-info">
+        <img src="/media/{{ task.user.avatar }}" alt="发布人头像" class="avatar">
+        <div>
+            <h4>{{ task.user }}</h4>
+            <small class="text-muted">发布时间：{{ task.time }}</small>
+        </div>
+    </div>
+
+    <!-- 任务状态 -->
+    <div class="status-badge status-{{ task.state }}">
+        {{ task.get_state_display }}
+    </div>
+
+    <!-- 任务标题 -->
+    <h2 class="mt-4">{{ task.title }}</h2>
+
+    <!-- 任务图片 -->
+    {% if task.demand_image %}
+    <div class="image-grid">
+        <img src="/media/{{ task.demand_image }}" alt="任务图片" class="task-image">
+    </div>
+    <!-- 查看图片 -->
+    <div id="modal" class="modal">
+        <span class="close">&times;</span>
+        <img class="modal-content" src="" alt="全屏图片">
+    </div>
+    {% endif %}
+
+    <!-- 任务需求 -->
+    <div class="task-content mt-4">
+        <h4>需求描述</h4>
+        <p class="lead">{{ task.demand }}</p>
+    </div>
+
+    <!-- 价格和按钮 -->
+    <div class="price-tag">
+        ¥ {{ task.price }}
+    </div>
+
+    <!-- 功能按钮组 -->
+    <div class="action-buttons">
+        <a class="btn btn-outline-primary" href="/user/friend/{{ task.user.id }}/see/">私聊TA</a>
+        <a href="/user/task/" class="btn btn-link">返回列表</a>
+    </div>
+</div>
+{% endblock %}
+
+{% block js %}
+<!-- 查看图片 -->
+<script>
+        var modal = document.getElementById("modal");
+        var closeBtn = document.getElementsByClassName("close")[0];
+        var images = document.querySelectorAll(".image-grid img");
+        var modalImg = document.querySelector(".modal-content");
+
+        images.forEach(function (image) {
+            image.addEventListener("click", function () {
+                var imgSrc = this.src;
+                modal.style.display = "flex";
+                modalImg.src = imgSrc;
+            });
+        });
+
+        closeBtn.addEventListener("click", function () {
+            modal.style.display = "none";
+        });
+
+        modal.addEventListener("click", function (event) {
+            if (event.target === modal) {
+                modal.style.display = "none";
+            }
+        });
+
+        modalImg.addEventListener('wheel', function (e) {
+            e.preventDefault();
+            var delta = e.deltaY;
+            var scale = 1.1;
+            if (delta < 0) {
+                scale = 1 / scale;
+            }
+            var transform = window.getComputedStyle(this).transform;
+            var matrix = new DOMMatrixReadOnly(transform);
+            var currentScale = matrix.m11;
+            var newScale = currentScale * scale;
+            this.style.transform = `scale(${newScale})`;
+        });
+
+
+</script>
+
+{% endblock %}

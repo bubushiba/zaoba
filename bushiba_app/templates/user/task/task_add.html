@@ -1,0 +1,147 @@
+{% extends 'user/muban.html' %}
+
+{% block title %}发布任务{% endblock %}
+
+{% block css %}
+<style>
+    .task-form {
+        max-width: 800px;
+        margin: 30px auto;
+        padding: 25px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .form-group {
+        margin-bottom: 20px;
+    }
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+    }
+    .form-control {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+    .btn-submit {
+        background: #007bff;
+        color: white;
+        padding: 12px 30px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+
+
+</style>
+<style>
+        /* 新增图片预览区域样式 */
+    .image-preview {
+        width: 200px;
+        height: 200px;
+        border: 2px dashed #ddd;
+        border-radius: 8px;
+        margin: 15px 0;
+        display: none; /* 默认隐藏 */
+        position: relative;
+    }
+
+    .preview-image {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        border-radius: 6px;
+    }
+
+    .remove-preview {
+        position: absolute;
+        top: -10px;
+        right: -10px;
+        background: #ff4444;
+        color: white;
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        text-align: center;
+        cursor: pointer;
+    }
+
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="task-form">
+    <h2>发布新任务</h2>
+    <form method="post" enctype="multipart/form-data" novalidate>
+        {% csrf_token %}
+        {% for field in form %}
+        <div class="form-group">
+            {% if field.label == '需求图片' %}
+                <div class="form-group">
+            <label for="id_demand_image">需求图片</label>
+            <!-- 图片预览容器 -->
+            <div class="image-preview">
+                <span class="remove-preview" onclick="clearPreview()">×</span>
+                <img src="#" alt="图片预览" class="preview-image" id="preview">
+            </div>
+            <div class="file-input-wrapper">
+                <input type="file"
+                       name="demand_image"
+                       id="id_demand_image"
+                       accept="image/*"
+                       onchange="previewImage(event)">
+                <span style="color: red;">{{ field.errors.0 }}</span>
+            </div>
+        </div>
+            {% else %}
+                <label>{{ field.label }}</label>
+                {{ field }}
+                <span style="color: red;">{{ field.errors.0 }}</span>
+            {% endif %}
+        </div>
+        {% endfor %}
+        <button type="submit" class="btn-submit">发布</button>
+    </form>
+</div>
+<script>
+    // 图片预览功能
+    function previewImage(event) {
+        const input = event.target;
+        const previewContainer = document.querySelector('.image-preview');
+        const previewImage = document.getElementById('preview');
+        const fileName = document.getElementById('file-name');
+
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                previewImage.src = e.target.result;
+                previewContainer.style.display = 'block';
+                fileName.textContent = input.files[0].name;
+            }
+
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    // 清除预览
+    function clearPreview() {
+        document.getElementById('id_demand_image').value = '';
+        document.querySelector('.image-preview').style.display = 'none';
+        document.getElementById('preview').src = '#';
+        document.getElementById('file-name').textContent = '未选择文件';
+    }
+</script>
+<script>
+    // 检查注册是否成功
+    {% if add_bool %}
+        alert('发布成功！');
+        window.location.href = "/user/task/";
+    {% endif %}
+</script>
+
+{% endblock %}

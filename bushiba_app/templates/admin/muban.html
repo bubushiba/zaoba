@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'plugins/bootstrap-3.4.1/css/bootstrap.min.css' %}">
+</head>
+<style>
+    .navbar{
+        border-radius:0;
+    }
+    .task - table td {
+    width: 200px; /* 设置合适的宽度，可按需调整 */
+    white - space: nowrap;
+    overflow: hidden;
+    text - overflow: ellipsis;
+    }
+</style>
+<style>
+    {% block css %}{% endblock %}
+</style>
+<body>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.4/dist/jquery.min.js"></script>
+
+<div class="navbar navbar-default">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+                    data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <p class="navbar-brand" style="font-size:25px;line-height:35px;">早吧网站管理系统</p>
+        </div>
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav navbar-left">
+                <li><a class="navbar-brand" style="line-height:35px;" href="/admin/welcome/">首页</a></li>
+                <li><a class="navbar-brand" style="line-height:35px;" href="/admin/school/list/">学校管理</a></li>
+                <li><a class="navbar-brand" style="line-height:35px;" href="/admin/user/list/">用户管理</a></li>
+                <li><a class="navbar-brand" style="line-height:35px;" href="/admin/task/list/">任务管理</a></li>
+                <li><a class="navbar-brand" style="line-height:35px;" href="/admin/activity/list/">动态管理</a></li>
+                <li><a class="navbar-brand" style="line-height:35px;" href="/admin/production/list/">作品管理</a></li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li class="dropdown">
+                    <div style="line-height:60px;" id="admin">
+                        管理员<span class="caret"></span>
+                    </div>
+                    <ul id="logout" class="dropdown-menu" style="display:none">
+                        <li><a href="/admin/logout/">退出登录</a></li>
+                    </ul>
+                    <script>
+                        let timeoutId; // 用于存储定时器的ID，方便后续清除定时器
+
+                        // 鼠标经过显示表单
+                        admin.onmouseover = function () {
+                            clearTimeout(timeoutId); // 鼠标移入时，清除可能存在的定时器（避免之前延迟隐藏的定时器生效）
+                            logout.style.display = "block";    // 显示编辑表单
+                        }
+                        // 鼠标离开启动延迟隐藏表单
+                        admin.onmouseout = function () {
+                            timeoutId = setTimeout(function () {
+                                logout.style.display = "none";    // 延迟1秒后隐藏表单
+                            }, 1000); // 1000毫秒
+                        }
+                    </script>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    {% block content %}{% endblock %}
+</div>
+
+
+
+<script src="{% static 'plugins/bootstrap-3.4.1/js/bootstrap.min.js' %}"></script>
+</body>
+
+</html>
+
+{% block js %}{% endblock %}

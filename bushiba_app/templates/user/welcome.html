@@ -1,0 +1,205 @@
+{%extends 'user/muban.html' %}
+
+{% block title %}首页{% endblock %}
+
+{% block css %}
+<style>
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+/* 标题样式 */
+.site-title {
+    text-align: center;
+    font-size: 2.5rem;
+    color: #2c3e50;
+    margin: 1.5rem 0;
+    font-weight: bold;
+}
+
+/* 卡片样式 */
+.about-card {
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    padding: 2rem;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.about-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+/* 欢迎消息样式 */
+.welcome-message {
+    margin-bottom: 2rem;
+}
+
+.welcome-message p {
+    font-size: 20px;
+    margin-bottom: 1rem;
+    color: #555;
+}
+
+.highlight {
+    color: #e74c3c;
+    font-weight: 600;
+}
+
+.contact-info {
+    font-style: italic;
+    color: #7f8c8d;
+}
+
+code {
+    background-color: #f5f5f5;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: Consolas, monospace;
+    font-size: 0.9em;
+    color: #c7254e;
+}
+
+/* 功能列表样式 */
+.section-title {
+    font-size: 1.5rem;
+    color: #3498db;
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 0.5rem;
+}
+
+.feature-list {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.feature-list li {
+    margin-bottom: 0.7rem;
+    padding-left: 1.5rem;
+    font-size: 1.5rem;
+    position: relative;
+}
+
+.feature-list li::before {
+    content: '•';
+    color: #3498db;
+    font-size: 1.5rem;
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+
+/* 技术信息样式 */
+.file-types {
+    display: inline-block;
+    margin: 0.5rem 0;
+    padding: 0.5rem 1rem;
+    background-color: #f9f9f9;
+    border-radius: 6px;
+    color: #555;
+    overflow-x: auto;
+    max-width: 100%;
+}
+
+.tech-stack {
+    margin: 1rem 0;
+}
+
+.tech-tag {
+    display: inline-block;
+    background-color: #3498db;
+    color: white;
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 1.5rem;
+    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
+    transition: background-color 0.3s ease;
+}
+
+.tech-tag:hover {
+    background-color: #2980b9;
+}
+
+.credit {
+    margin-top: 1.5rem;
+    font-size: 1.5rem;
+    color: #7f8c8d;
+}
+
+.credit-name {
+    color: #27ae60;
+    font-weight: 600;
+    font-size: 15px;
+}
+
+/* 响应式设计 */
+@media (max-width: 600px) {
+    .site-title {
+        font-size: 2rem;
+    }
+
+    .about-card {
+        padding: 1.5rem;
+    }
+
+    .section-title {
+        font-size: 1.25rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="site-title">早吧网</h1>
+
+    <div class="about-card">
+        <div class="welcome-message">
+            <p>
+                这是大学生聊天交友网站，主包还是大二，第一次做网站有点垃圾。从创建项目到部署服务器，也是用了三个多月呀。
+            </p>
+            <p>
+                如果哪里有bug或者有漏洞的，可以联系我，<span class="highlight">补药攻击我的网站😥</span>，互相提供学习机会🤝。
+            </p>
+            <p class="contact-info">
+                （主包wx：<code>bubushiba_123456</code>）
+            </p>
+        </div>
+
+        <div class="feature-section">
+            <h2 class="section-title">功能说明</h2>
+            <ul class="feature-list">
+                <li>因为开发顺序是任务表 --> 动态表 --> 作品表，所以越往后功能越完善（就是前面懒得改了🙃）</li>
+                <li>任务表：只能上传图片</li>
+                <li>动态表：只能上传三张图片</li>
+                <li>作品表：最多上传9张图片，且可以直接复制贴图，还能上传文件
+                    （'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'pdf', 'txt', 'zip', 'rar'）</li>
+                <li>聊天功能鼠标移到消息上可以显示消息发送的时间, 还有就是只能在消息界面上，才能接收到消息</li>
+                <li>游客功能：游客模式下，涉及到需要获取用户信息的都会跳转到此页面，不能发布任何数据</li>
+            </ul>
+        </div>
+
+        <div class="tech-section">
+            <h2 class="section-title">技术信息</h2>
+            <p class="tech-stack">
+                网站技术：
+                <span class="tech-tag">django</span>
+                <span class="tech-tag">mysql</span>
+                <span class="tech-tag">websocket</span>
+            </p>
+            <p class="credit">
+                技术指导：<span class="credit-name">豆包</span>、<span class="credit-name">deepseek</span>、<span class="credit-name">腾讯元宝</span>
+            </p>
+            <p style="margin: 0 auto;">编辑时间：2025.6.4</p>
+        </div>
+    </div>
+
+
+</div>
+
+{% endblock %}

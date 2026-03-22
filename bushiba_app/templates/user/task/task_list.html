@@ -1,0 +1,271 @@
+{% extends 'user/muban.html' %}  <!-- 继承基础布局 -->
+
+{% block title %}任务广场{% endblock %}
+
+{% block css %}
+<!-- 基础和任务列表css -->
+<style>
+    body {
+        font-size: 16px;  /* 基准字号从14px提升到16px */
+    }
+    /* 查看按钮 */
+    .edit-btn {
+        border: 1px solid #007bff;
+        color: #007bff;
+        padding: 6px 12px;
+        border-radius: 4px;
+        transition: all 0.3s;
+    }
+    /* 查看按钮动画 */
+    .edit-btn:hover {
+        background: #007bff;
+        color: white;
+        text-decoration: none;
+    }
+
+    /* 任务列表容器 */
+    .task-list {
+        max-width: 1000px;
+        margin: 0 auto;
+        background: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    /* 单个任务项 */
+    .task-item {
+        padding: 15px;
+        border-bottom: 1px solid #eee;
+        transition: background 0.3s;
+    }
+    /* 单个任务项动画 */
+    .task-item:hover {
+        background: #f8f9fa;
+    }
+    /* 状态标签 */
+    .status-badge {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 16px;
+    }
+    .status-unclaimed { background: #ffd700; color: #333; }  /* 未接单-金色 */
+    .status-claimed { background: #20c997; color: #fff; }    /* 已接单-青色 */
+    .status-completed { background: #6c757d; color: #fff; }  /* 已完成-灰色 */
+</style>
+<!-- 搜索框css -->
+<style>
+    /* 搜索框主容器 */
+    .search-container {
+        margin: 20px 0;        /* 上下20px间距，左右0保持靠左 */
+        width: fit-content;    /* 宽度自适应内容，实现靠左对齐 */
+    }
+
+    /* 搜索表单容器 */
+    .search-form {
+        display: flex;
+        max-width: 800px;      /* 增大最大宽度适应图片布局 */
+        margin-left: 0;        /* 取消自动居中，强制靠左 */
+        border-radius: 30px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        overflow: hidden;
+        background: white;
+        border: 1px solid #ddd; /* 添加浅灰色边框匹配图片效果 */
+    }
+
+    /* 输入框样式 */
+    .search-input {
+        flex: 1;
+        border: none;
+        padding: 12px 25px;
+        font-size: 16px;
+        outline: none;
+        min-width: 400px;       /* 设置最小宽度匹配图片比例 */
+        color: #333;            /* 深灰色文字更清晰 */
+    }
+
+    /* 搜索按钮优化 */
+    .search-button {
+        background: #007bff;
+        color: white;
+        border: none;
+        padding: 12px 35px;     /* 增大左右内边距匹配图片比例 */
+        min-width: 120px;       /* 加宽按钮匹配图片尺寸 */
+        cursor: pointer;
+        transition: all 0.3s;   /* 添加过渡动画 */
+        font-weight: 500;        /* 中等字重提升可读性 */
+        letter-spacing: 1px;     /* 字间距优化 */
+    }
+
+    /* 按钮悬停状态 */
+    .search-button:hover {
+        background: #0056b3;
+        transform: translateY(-1px); /* 添加轻微悬浮效果 */
+        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    /* 移动端适配 */
+    @media (max-width: 576px) {
+        .search-input {
+            padding: 10px 20px;
+            font-size: 14px;
+        }
+        .search-button {
+            padding: 10px 15px;
+            min-width: 80px;
+        }
+    }
+</style>
+<!-- 筛选框css -->
+<style>
+    /* 筛选容器 */
+    .filter-container {
+        display: flex;
+        gap: 15px;
+        margin: 20px 0;
+        align-items: center;
+    }
+
+    /* 筛选框样式 */
+    .status-filter {
+        width: 150px;
+        border: 1px solid #20c997;
+        border-radius: 20px;
+        padding: 10px 15px;
+        background: white;
+        color: #333;
+        margin-left: auto; /* 靠右对齐 */
+        transition: all 0.3s;
+        cursor: pointer;
+    }
+
+    /* 移动端适配 */
+    @media (max-width: 768px) {
+        .filter-container {
+            flex-direction: column;
+        }
+        .status-filter {
+            width: 100%;
+            margin-left: 0;
+        }
+    }
+</style>
+<!-- 新增悬浮按钮样式 -->
+<style>
+    /* 悬浮发布按钮 */
+    .float-action-btn {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        width: 60px;
+        height: 60px;
+        background: #007bff;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        transition: all 0.3s;
+        z-index: 1000;
+    }
+
+    .float-action-btn:hover {
+        background: #0056b3;
+        transform: translateY(-2px) scale(1.1);
+        box-shadow: 0 6px 16px rgba(0,0,0,0.3);
+    }
+
+    .float-action-btn i {
+        color: white;
+        font-size: 28px;
+    }
+
+    /* 移动端适配 */
+    @media (max-width: 768px) {
+        .float-action-btn {
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+        }
+        .float-action-btn i {
+            font-size: 24px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- 修改后的搜索筛选区域 -->
+<div class="container">
+    <form method="get" class="filter-container">
+        <!-- 原搜索框 -->
+        <div class="search-container">
+            <div class="search-form">
+                <input type="text"
+                       class="search-input"
+                       name="keyword"
+                       placeholder="输入标题或需求关键词..."
+                       value="{{ request.GET.keyword }}">
+                <button type="submit" class="search-button">
+                    <i class="fas fa-search"></i> 搜索
+                </button>
+            </div>
+        </div>
+
+        <!-- 新增状态筛选框 -->
+        <select class="status-filter"
+                name="status"
+                onchange="this.form.submit()">
+            <option value=" ">全部状态</option>
+            <option value="0" {% if status == '0' %}selected{% endif %}>未接单</option>
+            <option value="1" {% if status == '1' %}selected{% endif %}>已接单</option>
+            <option value="2" {% if status == '2' %}selected{% endif %}>已完成</option>
+        </select>
+    </form>
+</div>
+
+<!-- 任务列表 -->
+<div class="task-list">
+    {% if not data %}
+        <h3>未查询到数据</h3>
+    {% endif %}
+    {% for dep in data %}
+    <!-- 任务项模板 -->
+    <div class="task-item row">
+        <div class="col-md-8">
+            <div class="row">
+                <div class="col-sm-4">
+                    <small class="text-muted">发布人：{{ dep.user }}</small>
+                </div>
+                <div class="col-sm-4">
+                    <small class="text-muted">{{ dep.time }}</small>
+                </div>
+                <div class="col-sm-4">
+                    {% if dep.state == 0 %}
+                    <span class="status-badge status-unclaimed">未接单</span>
+                    {% elif dep.state == 1 %}
+                    <span class="status-badge status-claimed">已接单</span>
+                    {% elif dep.state == 2 %}
+                    <span class="status-badge status-completed">已完成</span>
+                    {% endif %}
+                </div>
+            </div>
+            <h5 class="mt-2">{{ dep.title|truncatechars:20 }}</h5>
+            <p class="text-muted">{{ dep.demand|truncatechars:10 }}</p>
+        </div>
+
+        <div class="col-md-4 text-right">
+            <div class="h5 text-primary">¥ {{ dep.price }}</div>
+            <a href="/user/task/{{ dep.id }}/see/" class="edit-btn">查看</a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- 新增悬浮按钮 -->
+<a href="/user/task/add/" class="float-action-btn">
+    <i class="fas fa-plus"></i>
+</a>
+{% endblock %}
