@@ -18,6 +18,7 @@ Including another URLconf
 from django.urls import path, include
 from bushiba_app import admin
 from bushiba_app import views
+from bushiba_app import ai_chat
 from bushiba_app import WebSocket
 from django.conf import settings
 from django.conf.urls.static import static
@@ -103,6 +104,10 @@ urlpatterns = [
     path('user/production/<int:nid>/see/', views.production_see),       # 查看作品
     path('user/production/<int:nid>/del/', views.production_del),       # 删除作品
     path('user/production/comment/<int:nid>/liker/', views.production_comment_liker),  # 改变作品(评论)点赞状态
+    
+    # AI聊天
+    path('user/ai_chat/', ai_chat.ai_chat),                           # AI聊天
+    path('user/ai_chat/api/', ai_chat.ai_chat_api),                   # AI聊天API接口
 
     # 聊天
     path('user/chat/', WebSocket.chat),

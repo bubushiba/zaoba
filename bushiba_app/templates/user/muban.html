@@ -28,6 +28,7 @@
     border-radius: 50%;  /* 关键属性，将直角变为圆形 */
     object-fit: cover;   /* 保持图片比例，填充容器 */
     }
+
 </style>
 {% block css %}{% endblock %}
 <body>
@@ -54,6 +55,8 @@
                 <li><a class="navbar-brand" style="font-size:25px;line-height:45px;" href="/user/activity/">动态瞬间</a>
                 </li>
                 <li><a class="navbar-brand" style="font-size:25px;line-height:45px;" href="/user/production/">作品展</a>
+                </li>
+                <li><a class="navbar-brand" style="font-size:25px;line-height:45px;" href="/user/ai_chat/">AI聊天</a>
                 </li>
             </ul>
             <ul class="nav navbar-nav navbar-right">
@@ -86,6 +89,7 @@
                                 logout.style.display = "none";    // 延迟1秒后隐藏表单
                             }, 1000); // 1000毫秒
                         }
+
                     </script>
                 </li>
             </ul>
