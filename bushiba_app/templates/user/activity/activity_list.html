@@ -424,7 +424,7 @@ function initPostMetadata() {
 
 <!-- 滚动加载更多数据 -->
 <script>
-let currentPage = 2;
+let currentPage = 1;
 let hasNext = true;
 let isLoading = false;
 
@@ -479,6 +479,8 @@ function loadMoreData() {
 
     const keyword = "{{ request.GET.keyword }}";
     const school = "{{ request.GET.school }}";
+    
+    currentPage++;
 
     $.ajax({
         url: `/user/activity/?keyword=${keyword}&school=${school}&page=${currentPage}`,
@@ -524,7 +526,6 @@ function loadMoreData() {
             });
 
             hasNext = response.has_next;
-            currentPage++;
             isLoading = false;
             hideLoading();
             initPostMetadata();
@@ -536,6 +537,8 @@ function loadMoreData() {
         error: function(error) {
             hideLoading();
             console.error('加载失败:', error);
+            isLoading = false; // 重置加载状态
+            currentPage--; // 回退页码
             // 可以添加重试逻辑
         }
     });
@@ -544,20 +547,41 @@ function loadMoreData() {
 // 初始化提示元素
 initLoadingIndicators();
 
-// 优化后的滚动处理（带节流）
-let lastScrollTime = 0;
-$(window).scroll(function() {
-    const now = Date.now();
-    if (now - lastScrollTime < 200) return;
-    lastScrollTime = now;
+// 优化后的滚动处理（使用和作品页面相同的逻辑）
+const checkScroll = throttle(() => {
+    const { scrollTop, scrollHeight } = document.documentElement;
+    const { innerHeight } = window;
 
-    const scrollPosition = $(window).scrollTop() + $(window).height();
-    const bottomPosition = $(document).height() - 100;
-
-    if (scrollPosition >= bottomPosition && !isLoading && hasNext) {
+    // 距离底部200px时触发加载
+    if (scrollTop + innerHeight >= scrollHeight - 200 && !isLoading && hasNext) {
         loadMoreData();
     }
-});
+}, 300);
+
+// 绑定滚动事件
+window.addEventListener('scroll', checkScroll);
+
+// 节流函数
+function throttle(func, limit) {
+    let lastFunc;
+    let lastRan;
+    return function() {
+        const context = this;
+        const args = arguments;
+        if (!lastRan) {
+            func.apply(context, args);
+            lastRan = Date.now();
+        } else {
+            clearTimeout(lastFunc);
+            lastFunc = setTimeout(() => {
+                if ((Date.now() - lastRan) >= limit) {
+                    func.apply(context, args);
+                    lastRan = Date.now();
+                }
+            }, limit - (Date.now() - lastRan));
+        }
+    };
+}
 
 </script>
 

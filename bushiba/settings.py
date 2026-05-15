@@ -27,9 +27,9 @@ MEDIA_URL = '/media/'       # 图片，文档都保存在这个文件夹下
 SECRET_KEY = 'django-insecure-kbu7(9it01#b!2uc=0)pi58dd%#*_qod)zligk0r=6o^)f(9ci'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
-ALLOWED_HOSTS = ['.onrender.com']
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition

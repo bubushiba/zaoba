@@ -1,7 +1,7 @@
 from django.core.validators import RegexValidator, ValidationError
 from bushiba_app.models import Users, Task, Activity, ActivityLike, ActivityComment, Production
 from django import forms
-import os, imghdr
+import os
 from bushiba_app.function import md5_data
 
 
