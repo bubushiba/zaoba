@@ -3,3 +3,5 @@ channels==4.2.2
 Django==5.0.4
 langchain_openai==1.2.1
 Pillow==12.2.0
+daphne
+
