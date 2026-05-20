@@ -17,9 +17,7 @@ Including another URLconf
 
 from django.urls import path, include
 from bushiba_app import admin
-from bushiba_app import views
-from bushiba_app import ai_chat
-from bushiba_app import WebSocket
+from bushiba_app import views, WebSocket, ai_chat
 from django.conf import settings
 from django.conf.urls.static import static
 
@@ -58,7 +56,7 @@ urlpatterns = [
 
     path('admin/test/', admin.test),
 
-# --------------------------------------------------------------------------------------
+# 用户端--------------------------------------------------------------------------------------
 
     # 用户界面
     path('user/login/', views.login),                           # 登录
@@ -115,5 +113,4 @@ urlpatterns = [
 ]
 
 # 用于加载图片
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

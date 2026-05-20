@@ -83,20 +83,39 @@ TEMPLATES = [
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
+# PostgreSQL配置（用于Render部署）
+import dj_database_url
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',  # 连接mysql数据库，也可以连接其他数据库
-        'NAME': 'bushiba',  # 数据库名
-        'USER': 'root',  # 用户
-        'PASSWORD': 'root',  # 密码
-        'HOST': '127.0.0.1',  # 网站的服务器ip(这里是本机ip)
-        'PORT': 3306,  # 端口
-        'OPTIONS': {
-            'charset': 'utf8mb4',  # 关键配置
-            'use_unicode': True,
-        },
-    }
+    'default': dj_database_url.config(
+        default='postgres://user:password@localhost:5432/bushiba',
+        conn_max_age=600,
+        conn_health_checks=True,
+    )
 }
+
+# MySQL配置（本地开发使用，已注释）
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'bushiba',
+#         'USER': 'root',
+#         'PASSWORD': 'root',
+#         'HOST': '127.0.0.1',
+#         'PORT': 3306,
+#         'OPTIONS': {
+#             'charset': 'utf8mb4',
+#             'use_unicode': True,
+#         },
+#     }
+# }
+
+# SQLite配置（展示/测试使用）
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
 
 
 # Password validation

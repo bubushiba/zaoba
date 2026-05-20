@@ -3,7 +3,6 @@ import random, os, hashlib
 from django.conf import settings
 
 
-
 # 生成验证码
 def Captcha():
     # 创建一个白色背景的图像
@@ -89,7 +88,7 @@ def production_image_del(datase, id):
 
 # md5加密
 def md5_data(data):
-    key = settings.SECRET_KEY   # django自带的密钥
+    key = settings.SECRET_KEY  # django自带的密钥
     obj = hashlib.md5(key.encode('utf-8'))
     obj.update(data.encode('utf-8'))
     return obj.hexdigest()

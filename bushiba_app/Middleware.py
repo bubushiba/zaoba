@@ -18,16 +18,11 @@ class Middleware_1(MiddlewareMixin):
 
         if 'add' in request.path_info and info['id'] == 0:
             return redirect('/user/welcome/')
-
         else:
             if 'admin' in request.path_info and ('pwd' not in info):
                 return redirect('/user/welcome/')
                 if info['pwd'] != 'sjksaf54ss13c3a':
                     return redirect('/user/welcome/')
 
-
-
-    def process_response(self, request, response):
-        return response
 
 

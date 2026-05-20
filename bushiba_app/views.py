@@ -68,7 +68,6 @@ def login(request):
 
 # 游客登入
 def visitor(request):
-    print('触发了')
     request.session['info'] = {'id': 0,
                                'user': '游客',
                                'scl_id': 0,
