@@ -1,14 +1,19 @@
 services:
   - type: web
-    name: my-django-app
+    name: zaoba
     env: python
+    region: oregon
+    buildCommand: |
+      pip install -r requirements.txt
+      python manage.py collectstatic --noinput
+      python manage.py migrate
+    startCommand: |
+      gunicorn bushiba.wsgi:application --bind 0.0.0.0:8000
     plan: free
-    buildCommand: ./build.sh
-    startCommand: gunicorn bushiba:application
     envVars:
-      - key: DEBUG
-        value: "False"
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: DJANGO_SETTINGS_MODULE
+        value: bushiba.settings
       - key: SECRET_KEY
         generateValue: true
-      - key: ALLOWED_HOSTS
-        value: ".onrender.com"
