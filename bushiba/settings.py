@@ -86,28 +86,28 @@ TEMPLATES = [
 
 
 # MySQL配置（本地开发使用，已注释）
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'bushiba',
-        'USER': 'root',
-        'PASSWORD': 'root',
-        'HOST': '127.0.0.1',
-        'PORT': 3306,
-        'OPTIONS': {
-            'charset': 'utf8mb4',
-            'use_unicode': True,
-        },
-    }
-}
-
-# SQLite配置（展示/测试使用）
 # DATABASES = {
 #     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'bushiba',
+#         'USER': 'root',
+#         'PASSWORD': 'root',
+#         'HOST': '127.0.0.1',
+#         'PORT': 3306,
+#         'OPTIONS': {
+#             'charset': 'utf8mb4',
+#             'use_unicode': True,
+#         },
 #     }
 # }
+
+# SQLite配置（展示/测试使用）
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
+}
 
 
 # Password validation
@@ -161,10 +161,10 @@ USE_L10N = True              # 启用本地化格式
 
 
 # 配置 Redis 通道层
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels.layers.InMemoryChannelLayer",
-    },
-}
+# CHANNEL_LAYERS = {
+#     "default": {
+#         "BACKEND": "channels.layers.InMemoryChannelLayer",
+#     },
+# }
 
 FILE_UPLOAD_MAX_MEMORY_SIZE = 35 * 1024 * 1024  # 35MB
