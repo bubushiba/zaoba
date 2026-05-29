@@ -1,10 +1,11 @@
 from django.shortcuts import render, HttpResponse, redirect
 import json
+import os
 from langchain_openai import ChatOpenAI
 
 
-API_KEY = "you_key"
-
+# 从环境变量读取API Key
+API_KEY = os.environ.get('OPENAI_API_KEY', '')
 # getAI聊天前端页面
 def ai_chat(request):
     if request.method == 'GET':
@@ -15,7 +16,11 @@ def ai_chat(request):
 def chat_with_openai(user_message):
     """使用 OpenAI 进行对话"""
     try:
-        # 初始化 OpenAI 客户端（key 先放空，后续配置）
+        # 检查API Key是否配置
+        if not API_KEY:
+            return 'Error: API Key未配置，请在Render环境变量中设置OPENAI_API_KEY'
+            
+        # 初始化 OpenAI 客户端
         llm = ChatOpenAI(
             api_key=API_KEY,
             base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
@@ -36,7 +41,6 @@ def ai_chat_api(request):
     if request.method == 'POST':
         try:
             user_message = request.POST.get('message', '').strip()
-            print(user_message)
             
             if not user_message:
                 response = {
@@ -46,7 +50,6 @@ def ai_chat_api(request):
                 return HttpResponse(json.dumps(response), content_type='application/json')
                 
             response_content = chat_with_openai(user_message)
-            print(response_content)
             
             # 检查是否是错误信息
             if response_content.startswith('Error:'):
