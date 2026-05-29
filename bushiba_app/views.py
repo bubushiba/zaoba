@@ -20,7 +20,7 @@ def image_code(request):
     stream = BytesIO()  # 创建内存对象
     img.save(stream, 'png')  # 保存到内存
     request.session['code'] = captcha
-    request.session.set_expiry(60 * 60 * 24 * 7)
+    request.session.set_expiry(60)
     return HttpResponse(stream.getvalue())  # 显示图片
 
 
@@ -36,21 +36,23 @@ def login(request):
         user_input_code = form.cleaned_data.pop('code')
         name = form.cleaned_data.get('name')
         pwd = form.cleaned_data.get('password')
-
+        # 管理员验证
         if name == 'admin_bushiba' and admin_pwd == 'sjksaf54ss13c3a' and user_input_code == request.session['code']:
             request.session['info'] = {'id': 0, 'user': name, 'pwd': admin_pwd}
             return redirect('/admin/welcome/')
 
         user_object = models.Users.objects.filter(name=name).first()
         if not user_object:  # 查询用户是否存在
-            form.add_error('password', '用户名或密码错误')
+            form.add_error('password', '用户名不存在')
             return render(request, 'user/login.html', {'form': form})
         else:  # 密码校验
             if pwd != user_object.password:
                 form.add_error('password', '用户名或密码错误')
-                return render(request, 'user/login.html', {'form': form})
             else:  # 验证码校验
-                if user_input_code != request.session['code']:
+                if not request.session.get('code'):
+                    form.add_error('code', '验证码过期（有效期60秒）')
+                    return render(request, 'user/login.html', {'form': form})
+                elif user_input_code != request.session['code']:
                     form.add_error('code', '验证码错误')
                     return render(request, 'user/login.html', {'form': form})
                 else:
@@ -931,7 +933,7 @@ def production_see(request, nid):
 # 作品评论点赞动作
 def production_comment_liker(request, nid):
     data = {'status': False}
-    liker_id = request.session['info']['id']
+    liker_id = liker_id = request.session.get('info', {}).get('id', None)
     if liker_id == 0:
         return HttpResponse(json.dumps(data))
     comment = models.ProductionComment.objects.filter(id=nid).first()  # 获取评论对象
