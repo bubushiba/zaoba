@@ -112,5 +112,5 @@ urlpatterns = [
     path('user/chat/message/', WebSocket.chat_history),     # 加载聊天记录
 ]
 
-# 用于加载图片
+# 加载图片
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

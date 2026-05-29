@@ -27,9 +27,10 @@ MEDIA_URL = '/media/'       # 图片，文档都保存在这个文件夹下
 SECRET_KEY = 'django-insecure-kbu7(9it01#b!2uc=0)pi58dd%#*_qod)zligk0r=6o^)f(9ci'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+# 本地开发时设为True，部署到Render时通过环境变量设为False
+DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '*').split(',')
 
 
 # Application definition
@@ -83,31 +84,22 @@ TEMPLATES = [
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-# PostgreSQL配置（用于Render部署）
-import dj_database_url
-DATABASES = {
-    'default': dj_database_url.config(
-        default='postgres://user:password@localhost:5432/bushiba',
-        conn_max_age=600,
-        conn_health_checks=True,
-    )
-}
 
 # MySQL配置（本地开发使用，已注释）
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.mysql',
-#         'NAME': 'bushiba',
-#         'USER': 'root',
-#         'PASSWORD': 'root',
-#         'HOST': '127.0.0.1',
-#         'PORT': 3306,
-#         'OPTIONS': {
-#             'charset': 'utf8mb4',
-#             'use_unicode': True,
-#         },
-#     }
-# }
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'bushiba',
+        'USER': 'root',
+        'PASSWORD': 'root',
+        'HOST': '127.0.0.1',
+        'PORT': 3306,
+        'OPTIONS': {
+            'charset': 'utf8mb4',
+            'use_unicode': True,
+        },
+    }
+}
 
 # SQLite配置（展示/测试使用）
 # DATABASES = {
